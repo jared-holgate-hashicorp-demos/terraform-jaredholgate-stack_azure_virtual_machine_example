@@ -31,6 +31,11 @@ variable "vault_virtual_machine_prefix" {
   default = "vault-server"
 }
 
+variable "parent_ip_range" {
+    type = string
+    default = "10.0.0.0/16"
+}
+
 variable "include_demo_vm" {
   type    = bool
   default = true

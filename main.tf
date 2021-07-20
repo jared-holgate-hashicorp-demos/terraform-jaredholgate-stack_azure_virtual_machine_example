@@ -1,24 +1,31 @@
+locals {
+    subnets = cidrsubnets(var.parent_ip_range, 8, 8, 8)
+    vault_ip_addresses = [ for index in range(1, var.vault_cluster_size) : cidrhost(subnets[1], index) ]
+    consul_ip_addresses = [ for index in range(1, var.consul_cluster_size) : cidrhost(subnets[0], index) ]
+    demo_ip_address = cidrhost(subnets[2], 1)
+}
+
 resource "azurerm_virtual_network" "vault" {
   name                = "vnet-vault"
   location            = var.location
   resource_group_name = var.resource_group_name
-  address_space       = ["10.0.1.0/24", "10.0.2.0/24"]
+  address_space       = local.subnets
 
   subnet {
     name           = "vault"
-    address_prefix = "10.0.1.0/24"
+    address_prefix = local.subnets[0]
   }
 
   subnet {
     name           = "consul"
-    address_prefix = "10.0.2.0/24"
+    address_prefix = local.subnets[1]
   }
 
   dynamic "subnet" {
       for_each = var.include_demo_vm ? { subnet = "demo" } : {}
       content {
         name           = "demo"
-        address_prefix = "10.0.3.0/24"
+        address_prefix = local.subnets[2]
       }
   }
 
@@ -57,7 +64,7 @@ resource "azurerm_network_interface" "demo" {
     subnet_id                     = azurerm_virtual_network.vault.subnet.*.id[2]
     private_ip_address_allocation = "Static"
     primary                       = true
-    private_ip_address            = "10.0.3.10"
+    private_ip_address            = local.demo_ip_address
   }
 }
 
@@ -97,7 +104,7 @@ resource "azurerm_network_interface" "vault" {
     subnet_id                     = azurerm_virtual_network.vault.subnet.*.id[0]
     private_ip_address_allocation = "Static"
     primary                       = true
-    private_ip_address            = "10.0.1.${10 + count.index}"
+    private_ip_address            = local.vault_ip_addresses[count.index]
   }
 }
 
@@ -112,7 +119,7 @@ resource "azurerm_network_interface" "consul" {
     subnet_id                     = azurerm_virtual_network.vault.subnet.*.id[1]
     private_ip_address_allocation = "Static"
     primary                       = true
-    private_ip_address            = "10.0.2.${10 + count.index}"
+    private_ip_address            = local.consul_ip_addresses[count.index]
   }
 }
 
