@@ -1,41 +1,41 @@
 variable "consul_cluster_size" {
-    type = number
-    default = 3
+  type    = number
+  default = 3
 }
 
 variable "vault_cluster_size" {
-    type = number
-    default = 3
+  type    = number
+  default = 3
 }
 
 variable "resource_group_name" {
-    type = string
+  type = string
 }
 
 variable "location" {
-    type = string
-    default = "UK South"
+  type    = string
+  default = "UK South"
 }
 
 variable "environment" {
-    type = string
+  type = string
 }
 
 variable "consul_virtual_machine_prefix" {
-    type = string
-    default = "consul-server"
+  type    = string
+  default = "consul-server"
 }
 
 variable "vault_virtual_machine_prefix" {
-    type = string
-    default = "vault-server"
+  type    = string
+  default = "vault-server"
 }
 
 resource "azurerm_virtual_network" "vault" {
   name                = "vnet-vault"
   location            = var.location
   resource_group_name = var.resource_group_name
-  address_space       = ["10.0.1.0/24", "10.0.2.0/24" ]
+  address_space       = ["10.0.1.0/24", "10.0.2.0/24"]
 
   subnet {
     name           = "vault"
@@ -85,7 +85,7 @@ resource "tls_private_key" "vault" {
 
 resource "azurerm_network_interface" "vault" {
   name                = "vault-nic"
-  count = var.vault_cluster_size
+  count               = var.vault_cluster_size
   location            = var.location
   resource_group_name = var.resource_group_name
 
@@ -93,14 +93,14 @@ resource "azurerm_network_interface" "vault" {
     name                          = "internal"
     subnet_id                     = azurerm_virtual_network.vault.subnet[0].id
     private_ip_address_allocation = "Static"
-    primary = true
-    private_ip_address = "10.0.1.${ 10 + count.index }"
+    primary                       = true
+    private_ip_address            = "10.0.1.${10 + count.index}"
   }
 }
 
 resource "azurerm_network_interface" "consul" {
   name                = "consul-nic"
-  count = var.consul_cluster_size
+  count               = var.consul_cluster_size
   location            = var.location
   resource_group_name = var.resource_group_name
 
@@ -108,8 +108,8 @@ resource "azurerm_network_interface" "consul" {
     name                          = "internal"
     subnet_id                     = azurerm_virtual_network.consul.subnet[0].id
     private_ip_address_allocation = "Static"
-    primary = true
-    private_ip_address = "10.0.2.${ 10 + count.index }"
+    primary                       = true
+    private_ip_address            = "10.0.2.${10 + count.index}"
   }
 }
 
@@ -122,13 +122,13 @@ data "template_file" "vault" {
 }
 
 resource "azurerm_linux_virtual_machine" "consul" {
-  count = var.consul_cluster_size
+  count               = var.consul_cluster_size
   name                = "consul-server-${count.index}"
   resource_group_name = var.resource_group_name
   location            = var.location
-  size                 = "Standard_DS2_v2"
+  size                = "Standard_DS2_v2"
   admin_username      = "adminuser"
-  custom_data = base64encode(data.template_file.consul.rendered)
+  custom_data         = base64encode(data.template_file.consul.rendered)
 
   admin_ssh_key {
     username   = "adminuser"
@@ -155,13 +155,13 @@ resource "azurerm_user_assigned_identity" "vault" {
 }
 
 resource "azurerm_linux_virtual_machine" "vault" {
-  count = var.vault_cluster_size
+  count               = var.vault_cluster_size
   name                = "vault-server-${count.index}"
   resource_group_name = var.resource_group_name
   location            = var.location
-  size                 = "Standard_DS2_v2"
+  size                = "Standard_DS2_v2"
   admin_username      = "adminuser"
-  custom_data = base64encode(data.template_file.vault.rendered)
+  custom_data         = base64encode(data.template_file.vault.rendered)
 
   admin_ssh_key {
     username   = "adminuser"
@@ -180,12 +180,12 @@ resource "azurerm_linux_virtual_machine" "vault" {
   ]
 
   identity {
-      type = "UserAssigned"
-      identity_ids = [ azurerm_user_assigned_identity.vault.id ]
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.vault.id]
   }
 }
 
 output "ssh_key" {
-    value = tls_private_key.vault.public_key_openssh
-    sensitive = true
+  value     = tls_private_key.vault.public_key_openssh
+  sensitive = true
 }
