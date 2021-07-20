@@ -46,7 +46,7 @@ resource "azurerm_network_interface" "vault" {
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_virtual_network.vault.subnet[0].id
+    subnet_id                     = azurerm_virtual_network.vault.subnet.*.id[0]
     private_ip_address_allocation = "Static"
     primary                       = true
     private_ip_address            = "10.0.1.${10 + count.index}"
@@ -61,7 +61,7 @@ resource "azurerm_network_interface" "consul" {
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_virtual_network.consul.subnet[0].id
+    subnet_id                     = azurerm_virtual_network.vault.subnet.*.id[1]
     private_ip_address_allocation = "Static"
     primary                       = true
     private_ip_address            = "10.0.2.${10 + count.index}"
