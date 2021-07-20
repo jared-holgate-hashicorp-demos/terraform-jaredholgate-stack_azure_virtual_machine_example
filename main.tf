@@ -90,7 +90,7 @@ resource "azurerm_linux_virtual_machine" "consul" {
     public_key = tls_private_key.vault.public_key_openssh
   }
 
-  source_image_id = azurerm_shared_image_version.consul.id
+  source_image_id = data.azurerm_shared_image_version.consul.id
 
   os_disk {
     storage_account_type = "Standard_LRS"
@@ -123,7 +123,7 @@ resource "azurerm_linux_virtual_machine" "vault" {
     public_key = tls_private_key.vault.public_key_openssh
   }
 
-  source_image_id = azurerm_shared_image_version.vault.id
+  source_image_id = data.azurerm_shared_image_version.vault.id
 
   os_disk {
     storage_account_type = "Standard_LRS"
