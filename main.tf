@@ -113,7 +113,6 @@ resource "azurerm_network_interface" "consul" {
   }
 }
 
-
 data "template_file" "consul" {
   template = file("consul.bash")
 }
