@@ -63,13 +63,14 @@ resource "azurerm_network_interface" "demo" {
 
 resource "azurerm_windows_virtual_machine" "demo" {
   name                = "demo"
+  count = var.include_demo_vm ? 1 : 0
   resource_group_name = var.resource_group_name
   location            = var.location
   size                = "Standard_F2"
   admin_username      = "adminuser"
   admin_password      = "P@$$w0rd1234!"
   network_interface_ids = [
-    azurerm_network_interface.demo.id,
+    azurerm_network_interface.demo[0].id,
   ]
 
   os_disk {
