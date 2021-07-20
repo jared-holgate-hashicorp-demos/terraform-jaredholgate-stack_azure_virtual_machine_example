@@ -1,36 +1,3 @@
-variable "consul_cluster_size" {
-  type    = number
-  default = 3
-}
-
-variable "vault_cluster_size" {
-  type    = number
-  default = 3
-}
-
-variable "resource_group_name" {
-  type = string
-}
-
-variable "location" {
-  type    = string
-  default = "UK South"
-}
-
-variable "environment" {
-  type = string
-}
-
-variable "consul_virtual_machine_prefix" {
-  type    = string
-  default = "consul-server"
-}
-
-variable "vault_virtual_machine_prefix" {
-  type    = string
-  default = "vault-server"
-}
-
 resource "azurerm_virtual_network" "vault" {
   name                = "vnet-vault"
   location            = var.location
@@ -183,9 +150,4 @@ resource "azurerm_linux_virtual_machine" "vault" {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.vault.id]
   }
-}
-
-output "ssh_key" {
-  value     = tls_private_key.vault.public_key_openssh
-  sensitive = true
 }
