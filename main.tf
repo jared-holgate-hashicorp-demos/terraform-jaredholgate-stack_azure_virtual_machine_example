@@ -14,6 +14,14 @@ resource "azurerm_virtual_network" "vault" {
     address_prefix = "10.0.2.0/24"
   }
 
+  dynamic "subnet" {
+      for_each = var.include_demo_vm ? { subnet = "demo" } : {}
+      content {
+        name           = "demo"
+        address_prefix = "10.0.3.0/24"
+      }
+  }
+
   tags = {
     environment = var.environment
   }
@@ -36,6 +44,45 @@ data "azurerm_shared_image_version" "consul" {
 resource "tls_private_key" "vault" {
   algorithm = "RSA"
   rsa_bits  = 4096
+}
+
+resource "azurerm_network_interface" "demo" {
+  name                = "demo-nic"
+  count               = var.include_demo_vm ? 1 : 0
+  location            = var.location
+  resource_group_name = var.resource_group_name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_virtual_network.vault.subnet.*.id[2]
+    private_ip_address_allocation = "Static"
+    primary                       = true
+    private_ip_address            = "10.0.3.10"
+  }
+}
+
+resource "azurerm_windows_virtual_machine" "demo" {
+  name                = "demo"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  size                = "Standard_F2"
+  admin_username      = "adminuser"
+  admin_password      = "P@$$w0rd1234!"
+  network_interface_ids = [
+    azurerm_network_interface.demo.id,
+  ]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "MicrosoftWindowsDesktop"
+    offer     = "Windows-10"
+    sku       = "21h1-pro-g2"
+    version   = "latest"
+  }
 }
 
 resource "azurerm_network_interface" "vault" {

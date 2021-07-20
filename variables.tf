@@ -30,3 +30,8 @@ variable "vault_virtual_machine_prefix" {
   type    = string
   default = "vault-server"
 }
+
+variable "include_demo_vm" {
+  type    = bool
+  default = true
+}
