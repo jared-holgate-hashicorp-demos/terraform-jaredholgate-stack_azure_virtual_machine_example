@@ -39,7 +39,7 @@ resource "tls_private_key" "vault" {
 }
 
 resource "azurerm_network_interface" "vault" {
-  name                = "vault-nic"
+  name                = "vault-nic-${count.index}"
   count               = var.vault_cluster_size
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -54,7 +54,7 @@ resource "azurerm_network_interface" "vault" {
 }
 
 resource "azurerm_network_interface" "consul" {
-  name                = "consul-nic"
+  name                = "consul-nic-${count.index}"
   count               = var.consul_cluster_size
   location            = var.location
   resource_group_name = var.resource_group_name
