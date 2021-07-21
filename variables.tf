@@ -55,3 +55,7 @@ variable "demo_vm_size" {
   type = string
   default = "Standard_B2s"
 }
+
+variable "client_secret_for_unseal" {
+  type = string
+}

@@ -36,6 +36,66 @@ resource "azurerm_virtual_network" "vault" {
   }
 }
 
+data "azuread_service_principal" "vault" {
+  application_id = var.client_id
+}
+
+data "azurerm_client_config" "current" {
+}
+
+resource "azurerm_key_vault" "vault" {
+  name                = "vault_keyvault"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  tenant_id           = azurerm_client_config.current.tenant_id
+
+  enabled_for_deployment = true
+
+  sku_name = "standard"
+
+  access_policy {
+    tenant_id = azurerm_client_config.current.tenant_id
+    object_id = data.azuread_service_principal.vault.object_id
+
+    key_permissions = [
+      "get",
+      "wrapKey",
+      "unwrapKey",
+    ]
+  }
+
+  access_policy {
+    tenant_id = azurerm_client_config.current.tenant_id
+    object_id = data.azurerm_client_config.current.object_id
+
+    key_permissions = [
+      "get",
+      "list",
+      "create",
+      "delete",
+      "update",
+    ]
+  }
+
+  network_acls {
+    default_action = "Allow"
+    bypass         = "AzureServices"
+  }
+}
+
+resource "azurerm_key_vault_key" "generated" {
+  name         = "vault-unseal-key"
+  key_vault_id = azurerm_key_vault.vault.id
+  key_type     = "RSA"
+  key_size     = 2048
+
+  key_opts = [
+    "wrapKey",
+    "unwrapKey",
+  ]
+}
+
+
 resource "azurerm_public_ip" "demo" {
   name                = "demo-public-ip"
   count               = var.include_demo_vm ? 1 : 0
@@ -98,7 +158,6 @@ data "azurerm_shared_image_version" "consul" {
   gallery_name        = "sig_jared_holgate"
   resource_group_name = "azure-vault-build"
 }
-
 
 resource "tls_private_key" "vault" {
   algorithm = "RSA"
@@ -169,12 +228,14 @@ resource "azurerm_network_interface" "vault" {
   }
 }
 
-resource "azurerm_user_assigned_identity" "vault" {
-  resource_group_name = var.resource_group_name
-  location            = var.location
-
-  name = "azure-vault-identity"
+resource "azurerm_role_assignment" "vault" {
+  count                = var.vault_cluster_size
+  scope                = azurerm_client_config.current.subscription_id
+  role_definition_name = "Owner"
+  principal_id         = azurerm_linux_virtual_machine.vault[count.index].principal_id
 }
+
+#TODO: Add The 'Application Administrator' Role Assignment to the MSI using REST
 
 resource "azurerm_linux_virtual_machine" "vault" {
   count               = var.vault_cluster_size
@@ -183,7 +244,17 @@ resource "azurerm_linux_virtual_machine" "vault" {
   location            = var.location
   size                = var.consul_vm_size
   admin_username      = "adminuser"
-  custom_data         = base64encode(templatefile("${path.module}/vault.bash", { server_name = "vault-server-${count.index}", server_ip = local.vault_ip_addresses[count.index], cluster_ips = local.consul_ip_addresses_flat }))
+  custom_data         = base64encode(templatefile("${path.module}/vault.bash", { 
+    server_name = "vault-server-${count.index}", 
+    server_ip = local.vault_ip_addresses[count.index], 
+    cluster_ips = local.consul_ip_addresses_flat,
+    tenant_id           = azurerm_client_config.current.tenant_id
+    subscription_id     = azurerm_client_config.current.subscription_id
+    client_id           = azurerm_client_config.client_id
+    client_secret       = var.client_secret
+    vault_name          = azurerm_key_vault.vault.name
+    key_name            = "vault-unseal-key"
+  }))
 
   admin_ssh_key {
     username   = "adminuser"
@@ -202,7 +273,6 @@ resource "azurerm_linux_virtual_machine" "vault" {
   ]
 
   identity {
-    type         = "UserAssigned"
-    identity_ids = [azurerm_user_assigned_identity.vault.id]
+    type         = "SystemAssigned"
   }
 }

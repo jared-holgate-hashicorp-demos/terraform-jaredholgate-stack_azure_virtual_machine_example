@@ -73,6 +73,14 @@ storage "consul" {
     path    = "vault/"
 }
 
+seal "azurekeyvault" {
+  client_id      = "${client_id}"
+  client_secret  = "${client_secret}"
+  tenant_id      = "${tenant_id}"
+  vault_name     = "${vault_name}"
+  key_name       = "${key_name}"
+}
+
 api_addr = "http://${server_ip}:8200"
 cluster_addr = "https:/${server_ip}:8201"
 EOF
@@ -113,3 +121,13 @@ systemctl daemon-reload
 sudo systemctl start vault
 
 sudo systemctl status vault
+
+export VAULT_ADDR=http://127.0.0.1:8200
+export VAULT_SKIP_VERIFY=true
+
+vault secrets enable azure
+
+vault write azure/config \
+  subscription_id=${subscription_id} \
+  tenant_id="${tenant_id}"
+
