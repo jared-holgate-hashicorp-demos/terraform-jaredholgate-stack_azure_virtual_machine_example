@@ -43,15 +43,15 @@ variable "include_demo_vm" {
 
 variable "vault_vm_size" {
   type = string
-  default = "Standard_B1S"
+  default = "Standard_B1s"
 }
 
 variable "consul_vm_size" {
   type = string
-  default = "Standard_B1S"
+  default = "Standard_B1s"
 }
 
 variable "demo_vm_size" {
   type = string
-  default = "Standard_B1S"
+  default = "Standard_B1s"
 }
