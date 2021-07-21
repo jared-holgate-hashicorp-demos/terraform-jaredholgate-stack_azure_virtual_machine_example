@@ -56,6 +56,13 @@ resource "azurerm_network_interface" "demo" {
   }
 }
 
+resource "random_string" "demo" {
+  length           = 16
+  special          = false
+  number           = true
+  upper            = true
+}
+
 resource "azurerm_windows_virtual_machine" "demo" {
   name                = "demo"
   count = var.include_demo_vm ? 1 : 0
@@ -63,7 +70,7 @@ resource "azurerm_windows_virtual_machine" "demo" {
   location            = var.location
   size                = var.demo_vm_size
   admin_username      = "adminuser"
-  admin_password      = "P@$$w0rd1234!"
+  admin_password      = random_string.demo.result
   network_interface_ids = [
     azurerm_network_interface.demo[0].id,
   ]
