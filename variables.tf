@@ -33,10 +33,25 @@ variable "vault_virtual_machine_prefix" {
 
 variable "parent_ip_range" {
     type = string
-    default = "10.0.0.0/16"
+    default = "10.1.0.0/16"
 }
 
 variable "include_demo_vm" {
   type    = bool
   default = true
+}
+
+variable "vault_vm_size" {
+  type = string
+  default = "Standard_B1S"
+}
+
+variable "consul_vm_size" {
+  type = string
+  default = "Standard_B1S"
+}
+
+variable "demo_vm_size" {
+  type = string
+  default = "Standard_B1S"
 }
