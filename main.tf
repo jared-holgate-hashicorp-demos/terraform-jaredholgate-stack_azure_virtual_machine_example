@@ -183,7 +183,7 @@ resource "azurerm_linux_virtual_machine" "vault" {
   location            = var.location
   size                = var.consul_vm_size
   admin_username      = "adminuser"
-  custom_data         = base64encode(templatefile("${path.module}/vault.bash", { server_name = "vault-server-${count.index}", server_ip = local.vault_ip_addresses[count.index], cluster_ips = local.vault_ip_addresses_flat }))
+  custom_data         = base64encode(templatefile("${path.module}/vault.bash", { server_name = "vault-server-${count.index}", server_ip = local.vault_ip_addresses[count.index], cluster_ips = local.consul_ip_addresses_flat }))
 
   admin_ssh_key {
     username   = "adminuser"
