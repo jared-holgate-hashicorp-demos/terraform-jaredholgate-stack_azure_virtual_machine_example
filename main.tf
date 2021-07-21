@@ -43,15 +43,15 @@ resource "azurerm_key_vault" "vault" {
   name                = "vault_keyvault"
   location            = var.location
   resource_group_name = var.resource_group_name
-  tenant_id           = azurerm_client_config.current.tenant_id
+  tenant_id           = data.azurerm_client_config.current.tenant_id
 
   enabled_for_deployment = true
 
   sku_name = "standard"
 
   access_policy {
-    tenant_id = azurerm_client_config.current.tenant_id
-    object_id = azurerm_client_config.current.client_id
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = data.azurerm_client_config.current.client_id
 
     key_permissions = [
       "get",
@@ -61,8 +61,8 @@ resource "azurerm_key_vault" "vault" {
   }
 
   access_policy {
-    tenant_id = azurerm_client_config.current.tenant_id
-    object_id = azurerm_client_config.current.client_id
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = data.azurerm_client_config.current.client_id
 
     key_permissions = [
       "get",
@@ -231,7 +231,7 @@ resource "azurerm_network_interface" "vault" {
 
 resource "azurerm_role_assignment" "vault" {
   count                = var.vault_cluster_size
-  scope                = azurerm_client_config.current.subscription_id
+  scope                = data.azurerm_client_config.current.subscription_id
   role_definition_name = "Owner"
   principal_id         = azurerm_linux_virtual_machine.vault[count.index].principal_id
 }
@@ -249,9 +249,9 @@ resource "azurerm_linux_virtual_machine" "vault" {
     server_name = "vault-server-${count.index}", 
     server_ip = local.vault_ip_addresses[count.index], 
     cluster_ips = local.consul_ip_addresses_flat,
-    tenant_id           = azurerm_client_config.current.tenant_id
-    subscription_id     = azurerm_client_config.current.subscription_id
-    client_id           = azurerm_client_config.client_id
+    tenant_id           = data.azurerm_client_config.current.tenant_id
+    subscription_id     = data.azurerm_client_config.current.subscription_id
+    client_id           = data.azurerm_client_config.client_id
     client_secret       = var.client_secret_for_unseal
     vault_name          = azurerm_key_vault.vault.name
     key_name            = "vault-unseal-key"
