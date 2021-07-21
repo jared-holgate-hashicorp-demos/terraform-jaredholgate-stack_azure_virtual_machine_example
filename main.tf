@@ -127,7 +127,7 @@ resource "azurerm_linux_virtual_machine" "consul" {
   location            = var.location
   size                = var.vault_vm_size
   admin_username      = "adminuser"
-  custom_data         = base64encode(templatefile("${path.module}/consul.bash", { server_name = "consul-server-${count.index}", server_ip = local.consul_ip_addresses[count.index], cluster_ips = local.consul_ip_addresses_flat }))
+  custom_data         = base64encode(templatefile("${path.module}/consul.bash", { server_count = var.consul_cluster_size, server_name = "consul-server-${count.index}", server_ip = local.consul_ip_addresses[count.index], cluster_ips = local.consul_ip_addresses_flat }))
 
   admin_ssh_key {
     username   = "adminuser"
