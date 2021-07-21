@@ -59,6 +59,7 @@ resource "azurerm_network_interface" "demo" {
   ip_configuration {
     name                          = "public"
     subnet_id                     = azurerm_virtual_network.vault.subnet.*.id[2]
+    private_ip_address_allocation = "Static"
     public_ip_address_id          = azurerm_public_ip.demo[0].id
   }
 }
