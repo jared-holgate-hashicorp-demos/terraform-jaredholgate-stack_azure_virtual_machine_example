@@ -38,7 +38,7 @@ PIDFile=/var/run/consul/consul.pid
 PermissionsStartOnly=true
 ExecStartPre=-/bin/mkdir -p /var/run/consul
 ExecStartPre=/bin/chown -R consul:consul /var/run/consul
-ExecStart=/usr/local/bin/consul agent \
+ExecStart=/usr/bin/consul agent \
     -config-file=/opt/consul/${server_name}.json \
     -pid-file=/var/run/consul/consul.pid
 ExecReload=/bin/kill -HUP $MAINPID
@@ -93,7 +93,7 @@ After=network-online.target
 User=vault
 Group=vault
 PIDFile=/var/run/vault/vault.pid
-ExecStart=/usr/local/bin/vault server -config=/opt/vault/${server_name}.hcl -log-level=debug
+ExecStart=/usr/bin/vault server -config=/opt/vault/${server_name}.hcl -log-level=debug
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 KillSignal=SIGTERM
