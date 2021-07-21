@@ -36,10 +36,6 @@ resource "azurerm_virtual_network" "vault" {
   }
 }
 
-data "azuread_service_principal" "vault" {
-  application_id = var.client_id
-}
-
 data "azurerm_client_config" "current" {
 }
 
@@ -55,7 +51,7 @@ resource "azurerm_key_vault" "vault" {
 
   access_policy {
     tenant_id = azurerm_client_config.current.tenant_id
-    object_id = data.azuread_service_principal.vault.object_id
+    object_id = azurerm_client_config.current.client_id
 
     key_permissions = [
       "get",
@@ -66,7 +62,7 @@ resource "azurerm_key_vault" "vault" {
 
   access_policy {
     tenant_id = azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
+    object_id = azurerm_client_config.current.client_id
 
     key_permissions = [
       "get",
@@ -186,7 +182,12 @@ resource "azurerm_linux_virtual_machine" "consul" {
   location            = var.location
   size                = var.vault_vm_size
   admin_username      = "adminuser"
-  custom_data         = base64encode(templatefile("${path.module}/consul.bash", { server_count = var.consul_cluster_size, server_name = "consul-server-${count.index}", server_ip = local.consul_ip_addresses[count.index], cluster_ips = local.consul_ip_addresses_flat }))
+  custom_data         = base64encode(templatefile("${path.module}/consul.bash", { 
+    server_count = var.consul_cluster_size, 
+    server_name = "consul-server-${count.index}", 
+    server_ip = local.consul_ip_addresses[count.index], 
+    cluster_ips = local.consul_ip_addresses_flat 
+  }))
 
   admin_ssh_key {
     username   = "adminuser"
@@ -251,7 +252,7 @@ resource "azurerm_linux_virtual_machine" "vault" {
     tenant_id           = azurerm_client_config.current.tenant_id
     subscription_id     = azurerm_client_config.current.subscription_id
     client_id           = azurerm_client_config.client_id
-    client_secret       = var.client_secret
+    client_secret       = var.client_secret_for_unseal
     vault_name          = azurerm_key_vault.vault.name
     key_name            = "vault-unseal-key"
   }))
