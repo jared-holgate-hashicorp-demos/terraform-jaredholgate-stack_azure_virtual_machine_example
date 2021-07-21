@@ -1,20 +1,20 @@
 #!/bin/bash
 
-echo '{' >> /usr/local/etc/consul/${server_name}.json
-echo '"server": true,' >> /usr/local/etc/consul/${server_name}.json
-echo '"node_name": "${server_name}",' >> /usr/local/etc/consul/${server_name}.json
-echo '"datacenter": "dc1",' >> /usr/local/etc/consul/${server_name}.json
-echo '"data_dir": "/var/consul/data",' >> /usr/local/etc/consul/${server_name}.json
-echo '"bind_addr": "0.0.0.0",' >> /usr/local/etc/consul/${server_name}.json
-echo '"client_addr": "0.0.0.0",' >> /usr/local/etc/consul/${server_name}.json
-echo '"advertise_addr": "${server_ip}",' >> /usr/local/etc/consul/${server_name}.json
-echo '"retry_join": ["${cluster_ips}"]' >> /usr/local/etc/consul/${server_name}.json
-echo '"ui": true,' >> /usr/local/etc/consul/${server_name}.json
-echo '"log_level": "DEBUG",' >> /usr/local/etc/consul/${server_name}.json
-echo '"enable_syslog": true,' >> /usr/local/etc/consul/${server_name}.json
-echo '"acl_enforce_version_8": false' >> /usr/local/etc/consul/${server_name}.json
-echo '}' >> /usr/local/etc/consul/${server_name}.json
-echo '' >> /usr/local/etc/consul/${server_name}.json
+echo '{' >> /opt/consul/${server_name}.json
+echo '"server": true,' >> /opt/consul/${server_name}.json
+echo '"node_name": "${server_name}",' >> /opt/consul/${server_name}.json
+echo '"datacenter": "dc1",' >> /opt/consul/${server_name}.json
+echo '"data_dir": "/var/consul/data",' >> /opt/consul/${server_name}.json
+echo '"bind_addr": "0.0.0.0",' >> /opt/consul/${server_name}.json
+echo '"client_addr": "0.0.0.0",' >> /opt/consul/${server_name}.json
+echo '"advertise_addr": "${server_ip}",' >> /opt/consul/${server_name}.json
+echo '"retry_join": ["${cluster_ips}"]' >> /opt/consul/${server_name}.json
+echo '"ui": true,' >> /opt/consul/${server_name}.json
+echo '"log_level": "DEBUG",' >> /opt/consul/${server_name}.json
+echo '"enable_syslog": true,' >> /opt/consul/${server_name}.json
+echo '"acl_enforce_version_8": false' >> /opt/consul/${server_name}.json
+echo '}' >> /opt/consul/${server_name}.json
+echo '' >> /opt/consul/${server_name}.json
 
 echo '### BEGIN INIT INFO' >> /etc/systemd/system/consul.service
 echo '# Provides:          consul' >> /etc/systemd/system/consul.service
@@ -39,7 +39,7 @@ echo 'PermissionsStartOnly=true' >> /etc/systemd/system/consul.service
 echo 'ExecStartPre=-/bin/mkdir -p /var/run/consul' >> /etc/systemd/system/consul.service
 echo 'ExecStartPre=/bin/chown -R consul:consul /var/run/consul' >> /etc/systemd/system/consul.service
 echo 'ExecStart=/usr/local/bin/consul agent \' >> /etc/systemd/system/consul.service
-echo '    -config-file=/usr/local/etc/consul/${server_name}.json \' >> /etc/systemd/system/consul.service
+echo '    -config-file=/opt/consul/${server_name}.json \' >> /etc/systemd/system/consul.service
 echo '    -pid-file=/var/run/consul/consul.pid' >> /etc/systemd/system/consul.service
 echo 'ExecReload=/bin/kill -HUP $MAINPID' >> /etc/systemd/system/consul.service
 echo 'KillMode=process' >> /etc/systemd/system/consul.service
