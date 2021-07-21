@@ -99,6 +99,12 @@ data "azurerm_shared_image_version" "consul" {
   resource_group_name = "azure-vault-build"
 }
 
+
+resource "tls_private_key" "vault" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
 resource "azurerm_network_interface" "consul" {
   name                = "consul-nic-${count.index}"
   count               = var.consul_cluster_size
@@ -114,16 +120,6 @@ resource "azurerm_network_interface" "consul" {
   }
 }
 
-
-resource "tls_private_key" "vault" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-data "template_file" "consul" {
-  template = file("consul.bash")
-}
-
 resource "azurerm_linux_virtual_machine" "consul" {
   count               = var.consul_cluster_size
   name                = "consul-server-${count.index}"
@@ -131,7 +127,7 @@ resource "azurerm_linux_virtual_machine" "consul" {
   location            = var.location
   size                = var.vault_vm_size
   admin_username      = "adminuser"
-  custom_data         = base64encode(data.template_file.consul.rendered)
+  custom_data         = base64encode(templatefile("${path.module}/consul.bash", { server_name = "consul-server-${count.index}", server_ip = local.consul_ip_addresses[count.index], cluster_ips = local.consul_ip_addresses_flat }))
 
   admin_ssh_key {
     username   = "adminuser"
@@ -173,10 +169,6 @@ resource "azurerm_network_interface" "vault" {
   }
 }
 
-data "template_file" "vault" {
-  template = file("vault.bash")
-}
-
 resource "azurerm_user_assigned_identity" "vault" {
   resource_group_name = var.resource_group_name
   location            = var.location
@@ -191,7 +183,7 @@ resource "azurerm_linux_virtual_machine" "vault" {
   location            = var.location
   size                = var.consul_vm_size
   admin_username      = "adminuser"
-  custom_data         = base64encode(data.template_file.vault.rendered)
+  custom_data         = base64encode(templatefile("${path.module}/vault.bash", { server_name = "vault-server-${count.index}", server_ip = local.vault_ip_addresses[count.index], cluster_ips = local.vault_ip_addresses_flat }))
 
   admin_ssh_key {
     username   = "adminuser"
