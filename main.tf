@@ -1,7 +1,7 @@
 locals {
     subnets = cidrsubnets(var.parent_ip_range, 8, 8, 8)
-    vault_ip_addresses = [ for index in range(1, var.vault_cluster_size + 1) : cidrhost(local.subnets[1], index) ]
     consul_ip_addresses = [ for index in range(1, var.consul_cluster_size + 1) : cidrhost(local.subnets[0], index) ]
+    vault_ip_addresses = [ for index in range(1, var.vault_cluster_size + 1) : cidrhost(local.subnets[1], index) ]
     demo_ip_address = cidrhost(local.subnets[2], 1)
 }
 
@@ -93,20 +93,6 @@ resource "azurerm_windows_virtual_machine" "demo" {
   }
 }
 
-resource "azurerm_network_interface" "vault" {
-  name                = "vault-nic-${count.index}"
-  count               = var.vault_cluster_size
-  location            = var.location
-  resource_group_name = var.resource_group_name
-
-  ip_configuration {
-    name                          = "internal"
-    subnet_id                     = azurerm_virtual_network.vault.subnet.*.id[0]
-    private_ip_address_allocation = "Static"
-    primary                       = true
-    private_ip_address            = local.vault_ip_addresses[count.index]
-  }
-}
 
 resource "azurerm_network_interface" "consul" {
   name                = "consul-nic-${count.index}"
@@ -116,7 +102,7 @@ resource "azurerm_network_interface" "consul" {
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_virtual_network.vault.subnet.*.id[1]
+    subnet_id                     = azurerm_virtual_network.vault.subnet.*.id[0]
     private_ip_address_allocation = "Static"
     primary                       = true
     private_ip_address            = local.consul_ip_addresses[count.index]
@@ -125,10 +111,6 @@ resource "azurerm_network_interface" "consul" {
 
 data "template_file" "consul" {
   template = file("consul.bash")
-}
-
-data "template_file" "vault" {
-  template = file("vault.bash")
 }
 
 resource "azurerm_linux_virtual_machine" "consul" {
@@ -155,6 +137,25 @@ resource "azurerm_linux_virtual_machine" "consul" {
   network_interface_ids = [
     azurerm_network_interface.consul[count.index].id,
   ]
+}
+
+resource "azurerm_network_interface" "vault" {
+  name                = "vault-nic-${count.index}"
+  count               = var.vault_cluster_size
+  location            = var.location
+  resource_group_name = var.resource_group_name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_virtual_network.vault.subnet.*.id[1]
+    private_ip_address_allocation = "Static"
+    primary                       = true
+    private_ip_address            = local.vault_ip_addresses[count.index]
+  }
+}
+
+data "template_file" "vault" {
+  template = file("vault.bash")
 }
 
 resource "azurerm_user_assigned_identity" "vault" {
