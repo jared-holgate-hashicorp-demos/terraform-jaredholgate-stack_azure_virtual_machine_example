@@ -73,7 +73,7 @@ resource "azurerm_windows_virtual_machine" "demo" {
   count = var.include_demo_vm ? 1 : 0
   resource_group_name = var.resource_group_name
   location            = var.location
-  size                = "Standard_F2"
+  size                = "Standard_B1S"
   admin_username      = "adminuser"
   admin_password      = "P@$$w0rd1234!"
   network_interface_ids = [
@@ -136,7 +136,7 @@ resource "azurerm_linux_virtual_machine" "consul" {
   name                = "consul-server-${count.index}"
   resource_group_name = var.resource_group_name
   location            = var.location
-  size                = "Standard_DS2_v2"
+  size                = "Standard_B1S"
   admin_username      = "adminuser"
   custom_data         = base64encode(data.template_file.consul.rendered)
 
@@ -169,7 +169,7 @@ resource "azurerm_linux_virtual_machine" "vault" {
   name                = "vault-server-${count.index}"
   resource_group_name = var.resource_group_name
   location            = var.location
-  size                = "Standard_DS2_v2"
+  size                = "Standard_B1S"
   admin_username      = "adminuser"
   custom_data         = base64encode(data.template_file.vault.rendered)
 
