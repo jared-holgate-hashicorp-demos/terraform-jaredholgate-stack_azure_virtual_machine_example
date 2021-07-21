@@ -53,6 +53,10 @@ EOF
 
 systemctl daemon-reload
 
+sudo mkdir /var/consul
+
+sudo chown consul:consul /var/consul
+
 sudo systemctl start consul
 
 sudo systemctl status consul
