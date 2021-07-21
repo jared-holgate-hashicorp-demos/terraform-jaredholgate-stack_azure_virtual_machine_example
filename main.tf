@@ -173,7 +173,7 @@ resource "azurerm_user_assigned_identity" "vault" {
   resource_group_name = var.resource_group_name
   location            = var.location
 
-  name = "azure-vault-identity-${var.environment}"
+  name = "azure-vault-identity"
 }
 
 resource "azurerm_linux_virtual_machine" "vault" {
