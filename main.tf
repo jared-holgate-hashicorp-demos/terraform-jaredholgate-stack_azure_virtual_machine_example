@@ -2,7 +2,6 @@ locals {
     subnets = cidrsubnets(var.parent_ip_range, 8, 8, 8)
     consul_ip_addresses = [ for index in range(10, var.consul_cluster_size + 1) : cidrhost(local.subnets[0], index) ]
     vault_ip_addresses = [ for index in range(10, var.vault_cluster_size + 1) : cidrhost(local.subnets[1], index) ]
-    demo_ip_address = cidrhost(local.subnets[2], 10)
 }
 
 resource "azurerm_virtual_network" "vault" {
@@ -51,9 +50,8 @@ resource "azurerm_network_interface" "demo" {
   ip_configuration {
     name                          = "internal"
     subnet_id                     = azurerm_virtual_network.vault.subnet.*.id[2]
-    private_ip_address_allocation = "Static"
+    private_ip_address_allocation = "Dynamic"
     primary                       = true
-    private_ip_address            = local.demo_ip_address
     public_ip_address_id          = azurerm_public_ip.demo[0].id
   }
 }
