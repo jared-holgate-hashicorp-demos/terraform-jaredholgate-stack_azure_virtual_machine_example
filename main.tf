@@ -251,7 +251,7 @@ resource "azurerm_linux_virtual_machine" "vault" {
     cluster_ips = local.consul_ip_addresses_flat,
     tenant_id           = data.azurerm_client_config.current.tenant_id
     subscription_id     = data.azurerm_client_config.current.subscription_id
-    client_id           = data.azurerm_client_config.client_id
+    client_id           = data.azurerm_client_config.current.client_id
     client_secret       = var.client_secret_for_unseal
     vault_name          = azurerm_key_vault.vault.name
     key_name            = "vault-unseal-key"
