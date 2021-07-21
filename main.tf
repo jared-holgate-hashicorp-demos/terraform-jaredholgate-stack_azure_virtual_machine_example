@@ -1,7 +1,7 @@
 locals {
     subnets = cidrsubnets(var.parent_ip_range, 8, 8, 8)
-    vault_ip_addresses = [ for index in range(1, var.vault_cluster_size) : cidrhost(local.subnets[1], index) ]
-    consul_ip_addresses = [ for index in range(1, var.consul_cluster_size) : cidrhost(local.subnets[0], index) ]
+    vault_ip_addresses = [ for index in range(1, var.vault_cluster_size + 1) : cidrhost(local.subnets[1], index) ]
+    consul_ip_addresses = [ for index in range(1, var.consul_cluster_size + 1) : cidrhost(local.subnets[0], index) ]
     demo_ip_address = cidrhost(local.subnets[2], 1)
 }
 
