@@ -58,4 +58,5 @@ variable "demo_vm_size" {
 
 variable "client_secret_for_unseal" {
   type = string
+  sensitive = true
 }
