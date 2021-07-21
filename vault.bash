@@ -8,7 +8,7 @@ cat > /opt/consul/${server_name}.json <<EOF
     "data_dir": "/var/consul/data",
     "bind_addr": "${server_ip}",
     "client_addr": "127.0.0.1",
-    "retry_join": ["${cluster_ips}"]
+    "retry_join": ["${cluster_ips}"],
     "log_level": "DEBUG",
     "enable_syslog": true,
     "acl_enforce_version_8": false

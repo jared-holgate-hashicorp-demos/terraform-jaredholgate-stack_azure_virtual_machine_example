@@ -9,7 +9,7 @@ cat > /opt/consul/${server_name}.json <<EOF
     "bind_addr": "0.0.0.0",
     "client_addr": "0.0.0.0",
     "advertise_addr": "${server_ip}",
-    "retry_join": ["${cluster_ips}"]
+    "retry_join": ["${cluster_ips}"],
     "ui": true,
     "log_level": "DEBUG",
     "enable_syslog": true,
