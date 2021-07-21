@@ -34,23 +34,12 @@ resource "azurerm_virtual_network" "vault" {
   }
 }
 
-data "azurerm_shared_image_version" "vault" {
-  name                = "latest"
-  image_name          = "vault-ubuntu-1804"
-  gallery_name        = "sig_jared_holgate"
-  resource_group_name = "azure-vault-build"
-}
-
-data "azurerm_shared_image_version" "consul" {
-  name                = "latest"
-  image_name          = "consul-ubuntu-1804"
-  gallery_name        = "sig_jared_holgate"
-  resource_group_name = "azure-vault-build"
-}
-
-resource "tls_private_key" "vault" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
+resource "azurerm_public_ip" "demo" {
+  name                = "demo-public-ip"
+  count               = var.include_demo_vm ? 1 : 0
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  allocation_method   = "Static"
 }
 
 resource "azurerm_network_interface" "demo" {
@@ -65,6 +54,12 @@ resource "azurerm_network_interface" "demo" {
     private_ip_address_allocation = "Static"
     primary                       = true
     private_ip_address            = local.demo_ip_address
+  }
+
+  ip_configuration {
+    name                          = "public"
+    subnet_id                     = azurerm_virtual_network.vault.subnet.*.id[2]
+    public_ip_address_id          = azurerm_public_ip.demo.id
   }
 }
 
@@ -94,6 +89,13 @@ resource "azurerm_windows_virtual_machine" "demo" {
 }
 
 
+data "azurerm_shared_image_version" "consul" {
+  name                = "latest"
+  image_name          = "consul-ubuntu-1804"
+  gallery_name        = "sig_jared_holgate"
+  resource_group_name = "azure-vault-build"
+}
+
 resource "azurerm_network_interface" "consul" {
   name                = "consul-nic-${count.index}"
   count               = var.consul_cluster_size
@@ -107,6 +109,12 @@ resource "azurerm_network_interface" "consul" {
     primary                       = true
     private_ip_address            = local.consul_ip_addresses[count.index]
   }
+}
+
+
+resource "tls_private_key" "vault" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
 }
 
 data "template_file" "consul" {
@@ -137,6 +145,14 @@ resource "azurerm_linux_virtual_machine" "consul" {
   network_interface_ids = [
     azurerm_network_interface.consul[count.index].id,
   ]
+}
+
+
+data "azurerm_shared_image_version" "vault" {
+  name                = "latest"
+  image_name          = "vault-ubuntu-1804"
+  gallery_name        = "sig_jared_holgate"
+  resource_group_name = "azure-vault-build"
 }
 
 resource "azurerm_network_interface" "vault" {
