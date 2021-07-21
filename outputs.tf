@@ -4,5 +4,5 @@ output "ssh_key" {
 }
 
 output "demo_public_ip_address" {
-  value = azurerm_public_ip.demo.ip_address
+  value = var.include_demo_vm ? azurerm_public_ip.demo.ip_address : ""
 }
