@@ -56,10 +56,10 @@ EOF
 
 systemctl daemon-reload
 
-sudo mkdir /var/consul
+mkdir /var/consul
 
-sudo chown consul:consul /var/consul
+chown consul:consul /var/consul
 
-sudo systemctl start consul
+systemctl start consul
 
-sudo systemctl status consul
+systemctl status consul
