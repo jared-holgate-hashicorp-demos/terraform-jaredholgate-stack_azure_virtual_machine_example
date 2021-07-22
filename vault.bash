@@ -122,8 +122,8 @@ sudo systemctl start vault
 
 sudo systemctl status vault
 
-sudo vault status
+sudo vault status -address="http://127.0.0.1:8200"
 
 sudo vault operator init -address="http://127.0.0.1:8200" -format="json" > /opt/vault/init.log 2>&1
 
-sudo vault status
+sudo vault status -address="http://127.0.0.1:8200"
