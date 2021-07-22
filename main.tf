@@ -48,7 +48,7 @@ resource "random_string" "key_vault_name" {
 
 
 resource "azurerm_key_vault" "vault" {
-  name                = random_string.key_vault_name
+  name                = random_string.key_vault_name.result
   location            = var.location
   resource_group_name = var.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
