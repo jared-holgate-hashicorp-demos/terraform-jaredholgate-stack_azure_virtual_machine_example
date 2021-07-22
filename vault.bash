@@ -116,13 +116,13 @@ RestartSec=42s
 WantedBy=multi-user.target
 EOF
 
-sudo systemctl daemon-reload
+systemctl daemon-reload
 
-sudo systemctl start vault
+systemctl start vault
 
-sudo systemctl status vault
+systemctl status vault
 
-netstat -ant |grep 8200 >> /opt/vault/cloud_init.log
+netstat -ant | grep 8200 >> /opt/vault/cloud_init.log
 
 vault status -address='http://127.0.0.1:8200' >> /opt/vault/cloud_init.log
 
@@ -130,6 +130,6 @@ vault operator init -address='http://127.0.0.1:8200' -format='json' >> /opt/vaul
 
 vault status -address='http://127.0.0.1:8200' >> /opt/vault/cloud_init.log
 
-netstat -ant |grep 8200 >> /opt/vault/cloud_init.log
+netstat -ant | grep 8200 >> /opt/vault/cloud_init.log
 
 cat /opt/vault/cloud_init.log
