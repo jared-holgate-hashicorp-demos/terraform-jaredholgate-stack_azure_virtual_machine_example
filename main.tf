@@ -39,8 +39,16 @@ resource "azurerm_virtual_network" "vault" {
 data "azurerm_client_config" "current" {
 }
 
+resource "random_string" "key_vault_name" {
+  length           = 24
+  special          = false
+  number           = false
+  upper            = false
+}
+
+
 resource "azurerm_key_vault" "vault" {
-  name                = "jared-holgate-hashi-${var.environment}"
+  name                = random_string.key_vault_name
   location            = var.location
   resource_group_name = var.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
