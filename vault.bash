@@ -122,7 +122,7 @@ systemctl start vault
 
 systemctl status vault
 
-while ! netstat -tna | grep 'LISTEN\>' | grep -q ':NNNN\>'; do
+while ! netstat -tna | grep 'LISTEN\>' | grep -q ':8200\>'; do
   sleep 10
   echo "Waiting for Vault to start..." 1>&2
 done
