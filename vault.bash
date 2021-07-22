@@ -125,7 +125,7 @@ sudo systemctl status vault
 export VAULT_ADDR=http://127.0.0.1:8200
 export VAULT_SKIP_VERIFY=true
 
-vault operator init > /opt/vault/init.log
+vault operator init -format=json > /opt/vault/init.log 2>&1
 
 vault secrets enable azure 
 
