@@ -229,9 +229,12 @@ resource "azurerm_network_interface" "vault" {
   }
 }
 
+data "azurerm_subscription" "current" {
+} 
+
 resource "azurerm_role_assignment" "vault" {
   count                = var.vault_cluster_size
-  scope                = data.azurerm_client_config.current.subscription_id
+  scope                = data.azurerm_subscription.current.id
   role_definition_name = "Owner"
   principal_id         = azurerm_linux_virtual_machine.vault[count.index].identity.0.principal_id
 }
