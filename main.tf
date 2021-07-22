@@ -63,21 +63,12 @@ resource "azurerm_key_vault" "vault" {
 
     key_permissions = [
       "get",
-      "wrapKey",
-      "unwrapKey",
-    ]
-  }
-
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
-
-    key_permissions = [
-      "get",
       "list",
       "create",
       "delete",
       "update",
+      "wrapKey",
+      "unwrapKey",
     ]
   }
 
