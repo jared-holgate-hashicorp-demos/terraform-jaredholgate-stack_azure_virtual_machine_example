@@ -139,6 +139,8 @@ RootToken=$(cat /opt/vault/init.json | jq -r '.root_token')
 
 echo $RootToken > /opt/vault/root_token.txt
 
+#TODO: Send the root token to the Key Vault and remove it from the logs
+
 echo $RootToken 1>&2
 
 vault login -token=$RootToken 1>&2
