@@ -40,7 +40,7 @@ data "azurerm_client_config" "current" {
 }
 
 resource "azurerm_key_vault" "vault" {
-  name                = "vault-keyvault"
+  name                = "jared-holgate-hashicorp-vault-keyvault-${var.environment}"
   location            = var.location
   resource_group_name = var.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
@@ -79,7 +79,7 @@ resource "azurerm_key_vault" "vault" {
   }
 }
 
-resource "azurerm_key_vault_key" "generated" {
+resource "azurerm_key_vault_key" "vault_unseal" {
   name         = "vault-unseal-key"
   key_vault_id = azurerm_key_vault.vault.id
   key_type     = "RSA"
