@@ -137,7 +137,7 @@ vault status -address='http://127.0.0.1:8200' 1>&2
 
 RootToken=$(cat /opt/vault/init.json | jq -r '.root_token')
 
-if [ -z $RootToken ]
+if [ ! -z $RootToken ]
 then
     echo $RootToken > /opt/vault/root_token.txt
     #TODO: Send the root token to the Key Vault and remove it from the logs
