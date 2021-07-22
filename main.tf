@@ -1,10 +1,10 @@
 locals {
-    subnets = cidrsubnets(var.parent_ip_range, 8, 8, 8)
-    consul_ip_addresses = [ for index in range(10, var.consul_cluster_size + 10) : cidrhost(local.subnets[0], index) ]
-    vault_ip_addresses = [ for index in range(10, var.vault_cluster_size + 10) : cidrhost(local.subnets[1], index) ]
+  subnets             = cidrsubnets(var.parent_ip_range, 8, 8, 8)
+  consul_ip_addresses = [for index in range(10, var.consul_cluster_size + 10) : cidrhost(local.subnets[0], index)]
+  vault_ip_addresses  = [for index in range(10, var.vault_cluster_size + 10) : cidrhost(local.subnets[1], index)]
 
-    consul_ip_addresses_flat = join("\",\"", local.consul_ip_addresses)
-    vault_ip_addresses_flat = join("\",\"", local.vault_ip_addresses)
+  consul_ip_addresses_flat = join("\",\"", local.consul_ip_addresses)
+  vault_ip_addresses_flat  = join("\",\"", local.vault_ip_addresses)
 }
 
 resource "azurerm_virtual_network" "vault" {
@@ -24,11 +24,11 @@ resource "azurerm_virtual_network" "vault" {
   }
 
   dynamic "subnet" {
-      for_each = var.include_demo_vm ? { subnet = "demo" } : {}
-      content {
-        name           = "demo"
-        address_prefix = local.subnets[2]
-      }
+    for_each = var.include_demo_vm ? { subnet = "demo" } : {}
+    content {
+      name           = "demo"
+      address_prefix = local.subnets[2]
+    }
   }
 
   tags = {
@@ -40,12 +40,11 @@ data "azurerm_client_config" "current" {
 }
 
 resource "random_string" "key_vault_name" {
-  length           = 24
-  special          = false
-  number           = false
-  upper            = false
+  length  = 24
+  special = false
+  number  = false
+  upper   = false
 }
-
 
 resource "azurerm_key_vault" "vault" {
   name                = random_string.key_vault_name.result
@@ -115,15 +114,15 @@ resource "azurerm_network_interface" "demo" {
 }
 
 resource "random_string" "demo" {
-  length           = 16
-  special          = false
-  number           = true
-  upper            = true
+  length  = 16
+  special = false
+  number  = true
+  upper   = true
 }
 
 resource "azurerm_windows_virtual_machine" "demo" {
   name                = "demo"
-  count = var.include_demo_vm ? 1 : 0
+  count               = var.include_demo_vm ? 1 : 0
   resource_group_name = var.resource_group_name
   location            = var.location
   size                = var.demo_vm_size
@@ -181,11 +180,11 @@ resource "azurerm_linux_virtual_machine" "consul" {
   location            = var.location
   size                = var.vault_vm_size
   admin_username      = "adminuser"
-  custom_data         = base64encode(templatefile("${path.module}/consul.bash", { 
-    server_count = var.consul_cluster_size, 
-    server_name = "consul-server-${count.index}", 
-    server_ip = local.consul_ip_addresses[count.index], 
-    cluster_ips = local.consul_ip_addresses_flat 
+  custom_data = base64encode(templatefile("${path.module}/consul.bash", {
+    server_count = var.consul_cluster_size,
+    server_name  = "consul-server-${count.index}",
+    server_ip    = local.consul_ip_addresses[count.index],
+    cluster_ips  = local.consul_ip_addresses_flat
   }))
 
   admin_ssh_key {
@@ -229,26 +228,26 @@ resource "azurerm_network_interface" "vault" {
 }
 
 data "azurerm_subscription" "current" {
-} 
+}
 
 resource "azurerm_linux_virtual_machine" "vault" {
   count               = var.vault_cluster_size
-  depends_on          = [ azurerm_key_vault_key.vault_unseal, azurerm_linux_virtual_machine.consul ]
+  depends_on          = [azurerm_key_vault_key.vault_unseal, azurerm_linux_virtual_machine.consul]
   name                = "vault-server-${count.index}"
   resource_group_name = var.resource_group_name
   location            = var.location
   size                = var.consul_vm_size
   admin_username      = "adminuser"
-  custom_data         = base64encode(templatefile("${path.module}/vault.bash", { 
-    server_name = "vault-server-${count.index}", 
-    server_ip = local.vault_ip_addresses[count.index], 
-    cluster_ips = local.consul_ip_addresses_flat,
-    tenant_id           = data.azurerm_client_config.current.tenant_id
-    subscription_id     = data.azurerm_client_config.current.subscription_id
-    client_id           = data.azurerm_client_config.current.client_id
-    client_secret       = var.client_secret_for_unseal
-    vault_name          = azurerm_key_vault.vault.name
-    key_name            = "vault-unseal-key"
+  custom_data = base64encode(templatefile("${path.module}/vault.bash", {
+    server_name     = "vault-server-${count.index}",
+    server_ip       = local.vault_ip_addresses[count.index],
+    cluster_ips     = local.consul_ip_addresses_flat,
+    tenant_id       = data.azurerm_client_config.current.tenant_id
+    subscription_id = data.azurerm_client_config.current.subscription_id
+    client_id       = data.azurerm_client_config.current.client_id
+    client_secret   = var.client_secret_for_unseal
+    vault_name      = azurerm_key_vault.vault.name
+    key_name        = "vault-unseal-key"
   }))
 
   admin_ssh_key {
@@ -268,7 +267,7 @@ resource "azurerm_linux_virtual_machine" "vault" {
   ]
 
   identity {
-    type         = "SystemAssigned"
+    type = "SystemAssigned"
   }
 }
 
@@ -280,17 +279,17 @@ resource "azurerm_role_assignment" "vault" {
 }
 
 resource "null_resource" "assign_role" {
-  count                = var.vault_cluster_size
+  count = var.vault_cluster_size
   triggers = {
     managed_identities = join(",", azurerm_linux_virtual_machine.vault.*.identity.0.principal_id)
   }
   provisioner "local-exec" {
-    command = templatefile("${path.module}/assign_role.bash", { 
-      tenant_id           = data.azurerm_client_config.current.tenant_id
-      client_id           = data.azurerm_client_config.current.client_id
-      client_secret       = var.client_secret_for_unseal
-      msi_principal_id    = azurerm_linux_virtual_machine.vault[count.index].identity.0.principal_id
-      role_definition_id  = "9b895d92-2cd3-44c7-9d02-a6ac2d5ea5c3"
+    command = templatefile("${path.module}/assign_role.bash", {
+      tenant_id          = data.azurerm_client_config.current.tenant_id
+      client_id          = data.azurerm_client_config.current.client_id
+      client_secret      = var.client_secret_for_unseal
+      msi_principal_id   = azurerm_linux_virtual_machine.vault[count.index].identity.0.principal_id
+      role_definition_id = "9b895d92-2cd3-44c7-9d02-a6ac2d5ea5c3"
     })
   }
 }

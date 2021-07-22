@@ -1,11 +1,14 @@
 output "ssh_key" {
-  value     = nonsensitive(tls_private_key.vault.private_key_pem)
+  description = "The SSH private key for connecting to the Linux virtual machines. NOTE: The should be encrypted or provided in production."
+  value       = nonsensitive(tls_private_key.vault.private_key_pem)
 }
 
 output "demo_password" {
-  value = var.include_demo_vm ? random_string.demo.result : ""
+  description = "The password for connecting to the Windows virtual machine. NOTE: The should be encrypted or provided in production."
+  value       = var.include_demo_vm ? random_string.demo.result : ""
 }
 
 output "demo_public_ip_address" {
-  value = var.include_demo_vm ? azurerm_public_ip.demo[0].ip_address : ""
+  description = "The public ip address for connecting to the Windows virtual machine."
+  value       = var.include_demo_vm ? azurerm_public_ip.demo[0].ip_address : ""
 }

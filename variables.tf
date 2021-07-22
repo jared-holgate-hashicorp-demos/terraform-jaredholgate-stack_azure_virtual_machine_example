@@ -1,62 +1,75 @@
 variable "consul_cluster_size" {
-  type    = number
-  default = 3
+  description = "The number of virtual machines to provision for the Consul cluster."
+  type        = number
+  default     = 3
 }
 
 variable "vault_cluster_size" {
-  type    = number
-  default = 3
+  description = "The number of virtual machines to provision for the Vault cluster."
+  type        = number
+  default     = 3
 }
 
 variable "resource_group_name" {
-  type = string
+  description = "The name of the resource group to deploy to."
+  type        = string
 }
 
 variable "location" {
-  type    = string
-  default = "UK South"
+  description = "The Azure Region to deploy the resources in."
+  type        = string
+  default     = "UK South"
 }
 
 variable "environment" {
-  type = string
+  description = "The environment, e.g. test, acpt or prod."
+  type        = string
 }
 
 variable "consul_virtual_machine_prefix" {
-  type    = string
-  default = "consul-server"
+  description = "The virtual machine name prefix for the Consul Cluster."
+  type        = string
+  default     = "consul-server"
 }
 
 variable "vault_virtual_machine_prefix" {
-  type    = string
-  default = "vault-server"
+  description = "The virtual machine name prefix for the Vault Cluster."
+  type        = string
+  default     = "vault-server"
 }
 
 variable "parent_ip_range" {
-    type = string
-    default = "10.1.0.0/16"
+  description = "The IP Range for the network."
+  type        = string
+  default     = "10.1.0.0/16"
 }
 
 variable "include_demo_vm" {
-  type    = bool
-  default = true
+  description = "Whether to provision a Windows virtual machine into the environment to use for testing / demos."
+  type        = bool
+  default     = true
 }
 
 variable "vault_vm_size" {
-  type = string
-  default = "Standard_B1s"
+  description = "The SKU of virtual machine for the Vault Cluster."
+  type        = string
+  default     = "Standard_B1s"
 }
 
 variable "consul_vm_size" {
-  type = string
-  default = "Standard_B1s"
+  description = "The SKU of virtual machine for the Consul Cluster."
+  type        = string
+  default     = "Standard_B1s"
 }
 
 variable "demo_vm_size" {
-  type = string
-  default = "Standard_B2s"
+  description = "The SKU of virtual machine for the Demo Windows virtual machine."
+  type        = string
+  default     = "Standard_B2s"
 }
 
 variable "client_secret_for_unseal" {
-  type = string
-  sensitive = true
+  description = "The client secret used for the auto unseal of vault."
+  type        = string
+  sensitive   = true
 }
