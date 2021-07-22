@@ -51,7 +51,7 @@ resource "azurerm_key_vault" "vault" {
 
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.client_id
+    object_id = data.azurerm_client_config.current.object_id
 
     key_permissions = [
       "get",
@@ -62,7 +62,7 @@ resource "azurerm_key_vault" "vault" {
 
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.client_id
+    object_id = data.azurerm_client_config.current.object_id
 
     key_permissions = [
       "get",
