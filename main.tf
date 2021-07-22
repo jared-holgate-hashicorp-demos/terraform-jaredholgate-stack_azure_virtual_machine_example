@@ -280,6 +280,7 @@ resource "azurerm_role_assignment" "vault" {
 }
 
 resource "null_resource" "assign_role" {
+  count                = var.vault_cluster_size
   triggers = {
     managed_identities = join(",", azurerm_linux_virtual_machine.vault.*.identity.0.principal_id)
   }
