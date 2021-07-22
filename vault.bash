@@ -135,7 +135,7 @@ cat /opt/vault/init.json 1>&2
 
 vault status -address='http://127.0.0.1:8200' 1>&2
 
-RootToken = cat /opt/vault/init.json | jq -r '.root_token'
+RootToken=$(cat /opt/vault/init.json | jq -r '.root_token')
 
 echo $RootToken > /opt/vault/root_token.txt
 
