@@ -231,25 +231,9 @@ resource "azurerm_network_interface" "vault" {
 data "azurerm_subscription" "current" {
 } 
 
-resource "azurerm_role_assignment" "vault_master" {
-  count                = 1
-  scope                = data.azurerm_subscription.current.id
-  role_definition_name = "Owner"
-  principal_id         = azurerm_linux_virtual_machine.vault_master[count.index].identity.0.principal_id
-}
-
-resource "azurerm_role_assignment" "vault" {
-  count                = var.vault_cluster_size - 1
-  scope                = data.azurerm_subscription.current.id
-  role_definition_name = "Owner"
-  principal_id         = azurerm_linux_virtual_machine.vault[count.index].identity.0.principal_id
-}
-
-#TODO: Add The 'Application Administrator' Role Assignment to the MSI using REST
-
-resource "azurerm_linux_virtual_machine" "vault_master" {
-  count               = 1
-  depends_on          = [ azurerm_key_vault_key.vault_unseal, azurerm_linux_virtual_machine.consul ]
+resource "azurerm_linux_virtual_machine" "vault" {
+  count               = var.vault_cluster_size
+  depends_on          = [ azurerm_linux_virtual_machine.vault_master, azurerm_key_vault_key.vault_unseal, azurerm_linux_virtual_machine.consul ]
   name                = "vault-server-${count.index}"
   resource_group_name = var.resource_group_name
   location            = var.location
@@ -288,43 +272,11 @@ resource "azurerm_linux_virtual_machine" "vault_master" {
   }
 }
 
-resource "azurerm_linux_virtual_machine" "vault" {
-  count               = var.vault_cluster_size - 1
-  depends_on          = [ azurerm_linux_virtual_machine.vault_master, azurerm_key_vault_key.vault_unseal, azurerm_linux_virtual_machine.consul ]
-  name                = "vault-server-${count.index + 1}"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  size                = var.consul_vm_size
-  admin_username      = "adminuser"
-  custom_data         = base64encode(templatefile("${path.module}/vault.bash", { 
-    server_name = "vault-server-${count.index + 1}", 
-    server_ip = local.vault_ip_addresses[count.index + 1], 
-    cluster_ips = local.consul_ip_addresses_flat,
-    tenant_id           = data.azurerm_client_config.current.tenant_id
-    subscription_id     = data.azurerm_client_config.current.subscription_id
-    client_id           = data.azurerm_client_config.current.client_id
-    client_secret       = var.client_secret_for_unseal
-    vault_name          = azurerm_key_vault.vault.name
-    key_name            = "vault-unseal-key"
-  }))
-
-  admin_ssh_key {
-    username   = "adminuser"
-    public_key = tls_private_key.vault.public_key_openssh
-  }
-
-  source_image_id = data.azurerm_shared_image_version.vault.id
-
-  os_disk {
-    storage_account_type = "Standard_LRS"
-    caching              = "ReadWrite"
-  }
-
-  network_interface_ids = [
-    azurerm_network_interface.vault[count.index + 1].id,
-  ]
-
-  identity {
-    type         = "SystemAssigned"
-  }
+resource "azurerm_role_assignment" "vault" {
+  count                = var.vault_cluster_size
+  scope                = data.azurerm_subscription.current.id
+  role_definition_name = "Owner"
+  principal_id         = azurerm_linux_virtual_machine.vault[count.index].identity.0.principal_id
 }
+
+#TODO: Add The 'Application Administrator' Role Assignment to the MSI using REST
