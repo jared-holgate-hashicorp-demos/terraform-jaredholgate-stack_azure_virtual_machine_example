@@ -125,11 +125,10 @@ sudo systemctl status vault
 export VAULT_ADDR=http://127.0.0.1:8200
 export VAULT_SKIP_VERIFY=true
 
-vault operator init
+vault operator init > /opt/vault/init.log
 
-vault secrets enable azure
+vault secrets enable azure 
 
 vault write azure/config \
   subscription_id=${subscription_id} \
   tenant_id="${tenant_id}"
-
