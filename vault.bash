@@ -122,12 +122,14 @@ sudo systemctl start vault
 
 sudo systemctl status vault
 
-echo netstat -ant |grep 8200
+netstat -ant |grep 8200 >> /opt/vault/cloud_init.log
 
-echo vault status -address="http://127.0.0.1:8200"
+vault status -address=http://127.0.0.1:8200 >> /opt/vault/cloud_init.log
 
-echo vault operator init -address="http://127.0.0.1:8200" -format="json"
+vault operator init -address=http://127.0.0.1:8200 -format=json >> /opt/vault/cloud_init.log
 
-echo vault status -address="http://127.0.0.1:8200"
+vault status -address=http://127.0.0.1:8200 >> /opt/vault/cloud_init.log
 
-echo netstat -ant |grep 8200
+netstat -ant |grep 8200 >> /opt/vault/cloud_init.log
+
+cat /opt/vault/cloud_init.log
