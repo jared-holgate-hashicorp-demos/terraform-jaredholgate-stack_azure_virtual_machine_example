@@ -235,14 +235,14 @@ resource "azurerm_role_assignment" "vault_master" {
   count                = 1
   scope                = data.azurerm_subscription.current.id
   role_definition_name = "Owner"
-  principal_id         = azurerm_linux_virtual_machine.vault[count.index].identity.0.principal_id
+  principal_id         = azurerm_linux_virtual_machine.vault_master[count.index].identity.0.principal_id
 }
 
 resource "azurerm_role_assignment" "vault" {
   count                = var.vault_cluster_size - 1
   scope                = data.azurerm_subscription.current.id
   role_definition_name = "Owner"
-  principal_id         = azurerm_linux_virtual_machine.vault[count.index + 1].identity.0.principal_id
+  principal_id         = azurerm_linux_virtual_machine.vault[count.index].identity.0.principal_id
 }
 
 #TODO: Add The 'Application Administrator' Role Assignment to the MSI using REST
