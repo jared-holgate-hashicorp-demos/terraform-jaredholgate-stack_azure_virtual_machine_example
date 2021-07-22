@@ -137,16 +137,14 @@ vault status -address='http://127.0.0.1:8200' 1>&2
 
 RootToken=$(cat /opt/vault/init.json | jq -r '.root_token')
 
-echo $RootToken > /opt/vault/root_token.txt
-
-#TODO: Send the root token to the Key Vault and remove it from the logs
-
-echo $RootToken 1>&2
-
-vault login -token=$RootToken 1>&2
-
-vault secrets enable azure 1>&2
-
-vault write azure/config \
-  subscription_id=${subscription_id} \
-  tenant_id="${tenant_id}" 1>&2
+if [ -n $RootToken ]
+then
+    echo $RootToken > /opt/vault/root_token.txt
+    #TODO: Send the root token to the Key Vault and remove it from the logs
+    echo $RootToken 1>&2
+    vault login $RootToken 1>&2
+    vault secrets enable azure 1>&2
+    vault write azure/config \
+    subscription_id=${subscription_id} \
+    tenant_id="${tenant_id}" 1>&2
+fi
