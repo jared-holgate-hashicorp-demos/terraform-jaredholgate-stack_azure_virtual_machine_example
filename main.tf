@@ -279,4 +279,17 @@ resource "azurerm_role_assignment" "vault" {
   principal_id         = azurerm_linux_virtual_machine.vault[count.index].identity.0.principal_id
 }
 
-#TODO: Add The 'Application Administrator' Role Assignment to the MSI using REST
+resource "null_resource" "assign_role" {
+  triggers = {
+    managed_identities = join(",", azurerm_linux_virtual_machine.vault.*.identity.0.principal_id)
+  }
+  provisioner "local-exec" {
+    command = templatefile("${path.module}/assign_role.bash", { 
+      tenant_id           = data.azurerm_client_config.current.tenant_id
+      client_id           = data.azurerm_client_config.current.client_id
+      client_secret       = var.client_secret_for_unseal
+      msi_principal_id    = azurerm_linux_virtual_machine.vault[count.index].identity.0.principal_id
+      role_definition_id  = "9b895d92-2cd3-44c7-9d02-a6ac2d5ea5c3"
+    })
+  }
+}
