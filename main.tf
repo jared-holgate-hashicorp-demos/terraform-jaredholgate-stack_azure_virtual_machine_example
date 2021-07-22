@@ -243,6 +243,7 @@ resource "azurerm_role_assignment" "vault" {
 
 resource "azurerm_linux_virtual_machine" "vault" {
   count               = var.vault_cluster_size
+  depends_on          = [ azurerm_key_vault_key.vault_unseal ]
   name                = "vault-server-${count.index}"
   resource_group_name = var.resource_group_name
   location            = var.location
