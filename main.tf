@@ -233,7 +233,7 @@ data "azurerm_subscription" "current" {
 
 resource "azurerm_linux_virtual_machine" "vault" {
   count               = var.vault_cluster_size
-  depends_on          = [ azurerm_linux_virtual_machine.vault_master, azurerm_key_vault_key.vault_unseal, azurerm_linux_virtual_machine.consul ]
+  depends_on          = [ azurerm_key_vault_key.vault_unseal, azurerm_linux_virtual_machine.consul ]
   name                = "vault-server-${count.index}"
   resource_group_name = var.resource_group_name
   location            = var.location
