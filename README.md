@@ -4,7 +4,7 @@ The module deploys the virtual machines from a template defined and build by Has
 
 It then configure the Vault and Consul clusters ready for use. As a final step it provision the Azure Secrets Engine into Vault using the MSI of the virtual machine.
 
-# Example Usage
+### Example Usage
 
 ```terraform
 module "stack_azure_hashicorp_vault" {
