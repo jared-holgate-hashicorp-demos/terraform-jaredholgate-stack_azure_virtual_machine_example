@@ -10,5 +10,5 @@ output "demo_password" {
 
 output "demo_public_ip_address" {
   description = "The public ip address for connecting to the Windows virtual machine."
-  value       = var.include_demo_vm ? azurerm_public_ip.demo[0].ip_address : ""
+  value       = var.include_demo_vm ? module.resource_windows_virtual_machine_demo.ip_addresses[0] : ""
 }
