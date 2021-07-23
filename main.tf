@@ -4,7 +4,6 @@ locals {
   vault_ip_addresses  = [for index in range(10, var.vault_cluster_size + 10) : cidrhost(local.subnets[1], index)]
 
   consul_ip_addresses_flat = join("\",\"", local.consul_ip_addresses)
-  vault_ip_addresses_flat  = join("\",\"", local.vault_ip_addresses)
 }
 
 resource "azurerm_virtual_network" "vault" {
