@@ -109,7 +109,6 @@ module "resource_windows_virtual_machine_demo" {
   subnet_id = azurerm_virtual_network.vault.subnet.*.id[2]
   tags = merge({
     cluster = "demo"
-    environment = var.environment
   }, var.tags)
 }
 
@@ -139,7 +138,6 @@ module "resource_linux_virtual_machine_consul" {
   static_ip_address = local.consul_ip_addresses[count.index]
   tags = merge({
     cluster = "consul"
-    environment = var.environment
   }, var.tags)
 }
 
@@ -171,7 +169,6 @@ module "resource_linux_virtual_machine_vault" {
   has_managed_identity = true
   tags = merge({
     cluster = "consul"
-    environment = var.environment
   }, var.tags)
 }
 
