@@ -21,11 +21,6 @@ variable "location" {
   default     = "UK South"
 }
 
-variable "environment" {
-  description = "The environment, e.g. test, acpt or prod."
-  type        = string
-}
-
 variable "consul_virtual_machine_prefix" {
   description = "The virtual machine name prefix for the Consul Cluster."
   type        = string
@@ -72,4 +67,9 @@ variable "client_secret_for_unseal" {
   description = "The client secret used for the auto unseal of vault."
   type        = string
   sensitive   = true
+}
+
+variable "tags" {
+    type = map(string)
+    default = {}
 }

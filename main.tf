@@ -2,7 +2,6 @@ locals {
   subnets             = cidrsubnets(var.parent_ip_range, 8, 8, 8)
   consul_ip_addresses = [for index in range(10, var.consul_cluster_size + 10) : cidrhost(local.subnets[0], index)]
   vault_ip_addresses  = [for index in range(10, var.vault_cluster_size + 10) : cidrhost(local.subnets[1], index)]
-
   consul_ip_addresses_flat = join("\",\"", local.consul_ip_addresses)
 }
 
@@ -30,9 +29,7 @@ resource "azurerm_virtual_network" "vault" {
     }
   }
 
-  tags = {
-    environment = var.environment
-  }
+  tags = var.tags
 }
 
 data "azurerm_client_config" "current" {
@@ -74,6 +71,8 @@ resource "azurerm_key_vault" "vault" {
     default_action = "Allow"
     bypass         = "AzureServices"
   }
+
+  tags = var.tags
 }
 
 resource "azurerm_key_vault_key" "vault_unseal" {
@@ -108,10 +107,10 @@ module "resource_windows_virtual_machine_demo" {
   source_image_publisher  = "MicrosoftWindowsDesktop"
   source_image_sku  = "21h1-pro-g2"
   subnet_id = azurerm_virtual_network.vault.subnet.*.id[2]
-  tags = {
+  tags = merge({
     cluster = "demo"
     environment = var.environment
-  }
+  }, var.tags)
 }
 
 resource "tls_private_key" "vault" {
@@ -138,10 +137,10 @@ module "resource_linux_virtual_machine_consul" {
   source_image_gallery_resource_group_name = "azure-vault-build"
   subnet_id = azurerm_virtual_network.vault.subnet.*.id[0]
   static_ip_address = local.consul_ip_addresses[count.index]
-  tags = {
+  tags = merge({
     cluster = "consul"
     environment = var.environment
-  }
+  }, var.tags)
 }
 
 module "resource_linux_virtual_machine_vault" {
@@ -170,10 +169,10 @@ module "resource_linux_virtual_machine_vault" {
   subnet_id = azurerm_virtual_network.vault.subnet.*.id[1]
   static_ip_address = local.vault_ip_addresses[count.index]
   has_managed_identity = true
-  tags = {
+  tags = merge({
     cluster = "consul"
     environment = var.environment
-  }
+  }, var.tags)
 }
 
 resource "azurerm_role_assignment" "vault" {
