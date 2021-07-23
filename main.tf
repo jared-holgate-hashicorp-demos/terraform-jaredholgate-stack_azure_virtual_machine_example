@@ -109,7 +109,6 @@ module "resource_windows_virtual_machine_demo" {
   source_image_publisher  = "MicrosoftWindowsDesktop"
   source_image_sku  = "21h1-pro-g2"
   subnet_id = azurerm_virtual_network.vault.subnet.*.id[2]
-  static_ip_addresses = azurerm_public_ip.demo[0].id
   tags = {
     cluster = "demo"
     environment = var.environment
