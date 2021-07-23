@@ -141,7 +141,7 @@ module "resource_linux_virtual_machine_consul" {
   source_image_gallery_name = "sig_jared_holgate"
   source_image_gallery_resource_group_name = "azure-vault-build"
   subnet_id = azurerm_virtual_network.vault.subnet.*.id[0]
-  static_ip_addresses = local.consul_ip_addresses[count.index]
+  static_ip_address = local.consul_ip_addresses[count.index]
   tags = {
     cluster = "consul"
     environment = var.environment
