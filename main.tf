@@ -120,9 +120,6 @@ resource "tls_private_key" "vault" {
   rsa_bits  = 4096
 }
 
-data "azurerm_subscription" "current" {
-}
-
 module "resource_linux_virtual_machine_consul" {
   source  = "app.terraform.io/jared-holgate-hashicorp/resource_linux_virtual_machine/jaredholgate"
   count = var.consul_cluster_size
