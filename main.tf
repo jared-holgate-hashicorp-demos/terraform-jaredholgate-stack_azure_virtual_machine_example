@@ -98,8 +98,8 @@ resource "random_string" "demo" {
 
 module "resource_windows_virtual_machine_demo" {
   source  = "app.terraform.io/jared-holgate-hashicorp/resource_windows_virtual_machine/jaredholgate"
-  machine_count = 1
-  name_prefix = "demo-"
+  count = var.include_demo_vm ? 1 : 0
+  name = "demo"
   resource_group_name = var.resource_group_name
   location = var.location
   size = var.demo_vm_size
@@ -125,8 +125,8 @@ data "azurerm_subscription" "current" {
 
 module "resource_linux_virtual_machine_consul" {
   source  = "app.terraform.io/jared-holgate-hashicorp/resource_linux_virtual_machine/jaredholgate"
-  machine_count = var.consul_cluster_size
-  name_prefix = "consul-server-"
+  count = var.consul_cluster_size
+  name = "consul-server-${count.index}"
   resource_group_name = var.resource_group_name
   location = var.location
   size = var.consul_vm_size
@@ -141,7 +141,7 @@ module "resource_linux_virtual_machine_consul" {
   source_image_gallery_name = "sig_jared_holgate"
   source_image_gallery_resource_group_name = "azure-vault-build"
   subnet_id = azurerm_virtual_network.vault.subnet.*.id[0]
-  static_ip_addresses = local.consul_ip_addresses
+  static_ip_addresses = local.consul_ip_addresses[count.index]
   tags = {
     cluster = "consul"
     environment = var.environment
@@ -150,9 +150,9 @@ module "resource_linux_virtual_machine_consul" {
 
 module "resource_linux_virtual_machine_vault" {
   source  = "app.terraform.io/jared-holgate-hashicorp/resource_linux_virtual_machine/jaredholgate"
-  machine_count = var.vault_cluster_size
+  count = var.vault_cluster_size
   depends_on = [ module.resource_linux_virtual_machine_consul ]
-  name_prefix = "vault-server-"
+  name = "vault-server-${count.index}"
   resource_group_name = var.resource_group_name
   location = var.location
   size = var.vault_vm_size
@@ -172,7 +172,7 @@ module "resource_linux_virtual_machine_vault" {
   source_image_gallery_name = "sig_jared_holgate"
   source_image_gallery_resource_group_name = "azure-vault-build"
   subnet_id = azurerm_virtual_network.vault.subnet.*.id[1]
-  static_ip_addresses = local.vault_ip_addresses
+  static_ip_address = local.vault_ip_addresses[count.index]
   has_managed_identity = true
   tags = {
     cluster = "consul"
