@@ -96,9 +96,9 @@ resource "random_string" "demo" {
   upper   = true
 }
 
-module "resource_windows_virtual_machinedemo" {
+module "resource_windows_virtual_machine_demo" {
   source  = "app.terraform.io/jared-holgate-hashicorp/resource_windows_virtual_machine/jaredholgate"
-  count = 1
+  machine_count = 1
   name_prefix = "demo-"
   resource_group_name = var.resource_group_name
   location = var.location
@@ -126,7 +126,7 @@ data "azurerm_subscription" "current" {
 
 module "resource_linux_virtual_machine_consul" {
   source  = "app.terraform.io/jared-holgate-hashicorp/resource_linux_virtual_machine/jaredholgate"
-  count = var.consul_cluster_size
+  machine_count = var.consul_cluster_size
   name_prefix = "consul-server-"
   resource_group_name = var.resource_group_name
   location = var.location
@@ -151,7 +151,7 @@ module "resource_linux_virtual_machine_consul" {
 
 module "resource_linux_virtual_machine_vault" {
   source  = "app.terraform.io/jared-holgate-hashicorp/resource_linux_virtual_machine/jaredholgate"
-  count = var.vault_cluster_size
+  machine_count = var.vault_cluster_size
   depends_on = [ module.resource_linux_virtual_machine_consul ]
   name_prefix = "vault-server-"
   resource_group_name = var.resource_group_name
