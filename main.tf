@@ -35,6 +35,9 @@ resource "azurerm_virtual_network" "vault" {
 data "azurerm_client_config" "current" {
 }
 
+data "azurerm_subscription" "current" {
+}
+
 resource "random_string" "key_vault_name" {
   length  = 24
   special = false
@@ -174,7 +177,7 @@ module "resource_linux_virtual_machine_vault" {
 
 resource "azurerm_role_assignment" "vault" {
   count                = var.vault_cluster_size
-  scope                = data.azurerm_client_config.current.subscription_id
+  scope                = data.azurerm_subscription.current.id
   role_definition_name = "Owner"
   principal_id         = module.resource_linux_virtual_machine_vault[count.index].managed_identity_principal_id
 }
