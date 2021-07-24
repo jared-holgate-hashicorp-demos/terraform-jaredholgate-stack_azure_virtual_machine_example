@@ -90,6 +90,7 @@ DNS.5 = *.*.*.*.*
 DNS.6 = *.*.*.*.*.*
 DNS.7 = *.*.*.*.*.*.*
 IP.1 = ${server_ip}
+IP.2 = 127.0.0.1
 EOF
 
 openssl req -x509 -batch -nodes -newkey rsa:2048 -keyout /opt/vault/selfsigned.key -out /opt/vault/selfsigned.crt -config /opt/vault/selfsigned.cfr -days 9999
