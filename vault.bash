@@ -100,7 +100,7 @@ cat /opt/vault/selfsigned.crt 1>&2
 
 cat > /opt/vault/${server_name}.hcl <<EOF
 listener "tcp" {
-    address          = "${server_ip}:8200"
+    address          = "0.0.0.0:8200"
     tls_cert_file = "/opt/vault/selfsigned.crt"
     tls_key_file = "/opt/vault/selfsigned.key"
     cluster_address  = "${server_ip}:8201"
