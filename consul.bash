@@ -63,3 +63,4 @@ chown consul:consul /var/consul
 systemctl start consul
 
 systemctl status consul
+ 
