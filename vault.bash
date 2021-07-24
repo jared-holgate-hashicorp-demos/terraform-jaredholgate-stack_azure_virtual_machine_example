@@ -95,6 +95,9 @@ EOF
 
 openssl req -x509 -batch -nodes -newkey rsa:2048 -keyout /opt/vault/selfsigned.key -out /opt/vault/selfsigned.crt -config /opt/vault/selfsigned.cfr -days 9999
 
+chown consul:consul /opt/vault/selfsigned.key
+chown consul:consul /opt/vault/selfsigned.crt
+
 cat /opt/vault/selfsigned.crt >> /etc/ssl/certs/ca-certificates.crt
 
 cat /opt/vault/selfsigned.crt 1>&2
@@ -103,7 +106,8 @@ cat > /opt/vault/${server_name}.hcl <<EOF
 listener "tcp" {
     address          = "0.0.0.0:8200"
     cluster_address  = "${server_ip}:8201"
-    tls_disable      = "true"
+    tls_cert_file = "/opt/vault/selfsigned.crt"
+    tls_key_file = "/opt/vault/selfsigned.key"
 }
 
 storage "consul" {
@@ -165,21 +169,22 @@ while ! netstat -tna | grep 'LISTEN\>' | grep -q ':8200\>'; do
   echo "Waiting for Vault to start..." 1>&2
 done
 
-vault status -address='http://127.0.0.1:8200' 1>&2
+vault status 1>&2
 
-vault operator init -address='http://127.0.0.1:8200' -format='json' > /opt/vault/init.json
+vault operator init -format='json' > /opt/vault/init.json
 
 cat /opt/vault/init.json 1>&2
 
-vault status -address='http://127.0.0.1:8200' 1>&2
+vault status 1>&2
 
 RootToken=$(cat /opt/vault/init.json | jq -r '.root_token')
 
-	@@ -142,7 +180,7 @@ then
+if [ ! -z $RootToken ]
+then
     echo $RootToken > /opt/vault/root_token.txt
     #TODO: Send the root token to the Key Vault and remove it from the logs
     echo $RootToken 1>&2
-    vault login -address='http://127.0.0.1:8200' $RootToken  1>&2
-    vault secrets enable -address='http://127.0.0.1:8200' azure  1>&2
-    vault write -address='http://127.0.0.1:8200' azure/config subscription_id="${subscription_id}" tenant_id="${tenant_id}" -address='http://127.0.0.1:8200' 1>&2
+    vault login $RootToken  1>&2
+    vault secrets enable azure  1>&2
+    vault write azure/config subscription_id="${subscription_id}" tenant_id="${tenant_id}" 1>&2
 fi
