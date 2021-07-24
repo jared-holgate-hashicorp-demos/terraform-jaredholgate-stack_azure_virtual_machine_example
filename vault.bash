@@ -121,7 +121,7 @@ seal "azurekeyvault" {
 }
 
 api_addr = "https://${server_ip}:8200"
-cluster_addr = "https:/${server_ip}:8201"
+cluster_addr = "https://${server_ip}:8201"
 EOF
 
 cat > /etc/systemd/system/vault.service <<EOF
