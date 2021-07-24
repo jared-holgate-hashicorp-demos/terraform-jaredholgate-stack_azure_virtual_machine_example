@@ -95,8 +95,8 @@ EOF
 
 openssl req -x509 -batch -nodes -newkey rsa:2048 -keyout /opt/vault/selfsigned.key -out /opt/vault/selfsigned.crt -config /opt/vault/selfsigned.cfr -days 9999
 
-chown consul:consul /opt/vault/selfsigned.key
-chown consul:consul /opt/vault/selfsigned.crt
+chown vault:vault /opt/vault/selfsigned.key
+chown vault:vault /opt/vault/selfsigned.crt
 
 cat /opt/vault/selfsigned.crt >> /etc/ssl/certs/ca-certificates.crt
 
