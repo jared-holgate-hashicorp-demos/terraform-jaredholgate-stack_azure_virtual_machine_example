@@ -103,6 +103,8 @@ chown vault:vault /opt/vault/selfsigned.key
 chown vault:vault /opt/vault/selfsigned.crt
 
 cat > /opt/vault/${server_name}.hcl <<EOF
+ui = true
+
 listener "tcp" {
     address          = "0.0.0.0:8200"
     cluster_address  = "${server_ip}:8201"
