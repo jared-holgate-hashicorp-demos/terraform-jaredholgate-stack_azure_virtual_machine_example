@@ -134,6 +134,7 @@ module "resource_linux_virtual_machine_consul" {
     cluster_ips  = local.consul_ip_addresses_flat
   })
   ssh_public_key                           = tls_private_key.vault.public_key_openssh
+  source_image_version                     = var.consul_cluster_image_version
   source_image_name                        = "consul-ubuntu-1804"
   source_image_gallery_name                = "sig_jared_holgate"
   source_image_gallery_resource_group_name = "azure-vault-build"
@@ -164,6 +165,7 @@ module "resource_linux_virtual_machine_vault" {
     key_name        = "vault-unseal-key"
   })
   ssh_public_key                           = tls_private_key.vault.public_key_openssh
+  source_image_version                     = var.vault_cluster_image_version
   source_image_name                        = "vault-ubuntu-1804"
   source_image_gallery_name                = "sig_jared_holgate"
   source_image_gallery_resource_group_name = "azure-vault-build"

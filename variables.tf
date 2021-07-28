@@ -10,6 +10,18 @@ variable "vault_cluster_size" {
   default     = 3
 }
 
+variable "consul_cluster_image_version" {
+  description = "The version of virtual machine image to provision for the Consul cluster."
+  type        = string
+  default     = "latest"
+}
+
+variable "vault_cluster_image_version" {
+  description = "The version of virtual machine image to provision for the Vault cluster."
+  type        = strng
+  default     = "latest"
+}
+
 variable "resource_group_name" {
   description = "The name of the resource group to deploy to."
   type        = string
