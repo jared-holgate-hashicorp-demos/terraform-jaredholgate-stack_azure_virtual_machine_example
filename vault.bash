@@ -189,4 +189,4 @@ then
     vault login $RootToken  1>&2
     vault secrets enable azure  1>&2
     vault write azure/config subscription_id="${subscription_id}" tenant_id="${tenant_id}" 1>&2
-fi 
+fi
