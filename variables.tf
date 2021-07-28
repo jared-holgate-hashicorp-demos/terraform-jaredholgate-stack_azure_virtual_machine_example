@@ -18,7 +18,7 @@ variable "consul_cluster_image_version" {
 
 variable "vault_cluster_image_version" {
   description = "The version of virtual machine image to provision for the Vault cluster."
-  type        = strng
+  type        = string
   default     = "latest"
 }
 
