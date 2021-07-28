@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CLIENT_SECRET='${client_secret}'
+
 cat > /opt/consul/${server_name}.json <<EOF
 {
     "server": false,
@@ -119,7 +121,7 @@ storage "consul" {
 
 seal "azurekeyvault" {
   client_id      = "${client_id}"
-  client_secret  = "${client_secret}"
+  client_secret  = "$CLIENT_SECRET"
   tenant_id      = "${tenant_id}"
   vault_name     = "${vault_name}"
   key_name       = "${key_name}"
