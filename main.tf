@@ -160,7 +160,7 @@ module "resource_linux_virtual_machine_vault" {
     tenant_id       = data.azurerm_client_config.current.tenant_id
     subscription_id = data.azurerm_client_config.current.subscription_id
     client_id       = data.azurerm_client_config.current.client_id
-    client_secret   = replace(var.client_secret_for_unseal, "\"", "\\\"")
+    client_secret   = replace(replace(var.client_secret_for_unseal, "\"", "\\\""), "`", "\\`")
     vault_name      = azurerm_key_vault.vault.name
     key_name        = "vault-unseal-key"
   })
