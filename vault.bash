@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CLIENT_SECRET=$'${client_secret}'
+CLIENT_SECRET='${client_secret}'
 
 cat > /opt/consul/${server_name}.json <<EOF
 {
