@@ -39,10 +39,10 @@ data "azurerm_subscription" "current" {
 }
 
 resource "random_string" "key_vault_name" {
-  length  = 24
-  special = false
-  number  = false
-  upper   = false
+  length      = 24
+  special     = false
+  number      = false
+  upper       = false
 }
 
 resource "azurerm_key_vault" "vault" {
@@ -91,10 +91,13 @@ resource "azurerm_key_vault_key" "vault_unseal" {
 }
 
 resource "random_string" "demo" {
-  length  = 16
-  special = false
-  number  = true
-  upper   = true
+  length      = 16
+  special     = false
+  number      = true
+  upper       = true
+  min_lower   = 1
+  min_numeric = 1
+  min_upper   = 1
 }
 
 module "resource_windows_virtual_machine_demo" {
