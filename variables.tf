@@ -1,25 +1,13 @@
-variable "consul_cluster_size" {
-  description = "The number of virtual machines to provision for the Consul cluster."
+variable "primary_cluster_size" {
+  description = "The number of virtual machines to provision for the primary cluster."
   type        = number
   default     = 3
 }
 
-variable "vault_cluster_size" {
-  description = "The number of virtual machines to provision for the Vault cluster."
+variable "secondary_cluster_size" {
+  description = "The number of virtual machines to provision for the secomndary cluster."
   type        = number
   default     = 3
-}
-
-variable "consul_cluster_image_version" {
-  description = "The version of virtual machine image to provision for the Consul cluster."
-  type        = string
-  default     = "latest"
-}
-
-variable "vault_cluster_image_version" {
-  description = "The version of virtual machine image to provision for the Vault cluster."
-  type        = string
-  default     = "latest"
 }
 
 variable "resource_group_name" {
@@ -33,16 +21,16 @@ variable "location" {
   default     = "UK South"
 }
 
-variable "consul_virtual_machine_prefix" {
-  description = "The virtual machine name prefix for the Consul Cluster."
+variable "primary_virtual_machine_prefix" {
+  description = "The virtual machine name prefix for the Primary Cluster."
   type        = string
-  default     = "consul-server"
+  default     = "primary-server"
 }
 
-variable "vault_virtual_machine_prefix" {
-  description = "The virtual machine name prefix for the Vault Cluster."
+variable "secondary_virtual_machine_prefix" {
+  description = "The virtual machine name prefix for the Secondary Cluster."
   type        = string
-  default     = "vault-server"
+  default     = "secondary-server"
 }
 
 variable "parent_ip_range" {
@@ -57,14 +45,14 @@ variable "include_demo_vm" {
   default     = true
 }
 
-variable "vault_vm_size" {
-  description = "The SKU of virtual machine for the Vault Cluster."
+variable "primary_vm_size" {
+  description = "The SKU of virtual machine for the Primary Cluster."
   type        = string
   default     = "Standard_B1s"
 }
 
-variable "consul_vm_size" {
-  description = "The SKU of virtual machine for the Consul Cluster."
+variable "secondary_vm_size" {
+  description = "The SKU of virtual machine for the Secondary Cluster."
   type        = string
   default     = "Standard_B1s"
 }
@@ -73,12 +61,6 @@ variable "demo_vm_size" {
   description = "The SKU of virtual machine for the Demo Windows virtual machine."
   type        = string
   default     = "Standard_B2s"
-}
-
-variable "client_secret_for_unseal" {
-  description = "The client secret used for the auto unseal of vault."
-  type        = string
-  sensitive   = true
 }
 
 variable "tags" {
