@@ -1,23 +1,22 @@
 locals {
   subnets                  = cidrsubnets(var.parent_ip_range, 8, 8, 8)
-  consul_ip_addresses      = [for index in range(10, var.consul_cluster_size + 10) : cidrhost(local.subnets[0], index)]
-  vault_ip_addresses       = [for index in range(10, var.vault_cluster_size + 10) : cidrhost(local.subnets[1], index)]
-  consul_ip_addresses_flat = join("\",\"", local.consul_ip_addresses)
+  primary_ip_addresses      = [for index in range(10, var.consul_cluster_size + 10) : cidrhost(local.subnets[0], index)]
+  secondary_ip_addresses       = [for index in range(10, var.vault_cluster_size + 10) : cidrhost(local.subnets[1], index)]
 }
 
-resource "azurerm_virtual_network" "vault" {
-  name                = "vnet-vault"
+resource "azurerm_virtual_network" "main" {
+  name                = "vnet-main"
   location            = var.location
   resource_group_name = var.resource_group_name
   address_space       = local.subnets
 
   subnet {
-    name           = "vault"
+    name           = "primary"
     address_prefix = local.subnets[0]
   }
 
   subnet {
-    name           = "consul"
+    name           = "secondary"
     address_prefix = local.subnets[1]
   }
 
@@ -38,58 +37,6 @@ data "azurerm_client_config" "current" {
 data "azurerm_subscription" "current" {
 }
 
-resource "random_string" "key_vault_name" {
-  length      = 24
-  special     = false
-  number      = false
-  upper       = false
-}
-
-resource "azurerm_key_vault" "vault" {
-  name                = random_string.key_vault_name.result
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  tenant_id           = data.azurerm_client_config.current.tenant_id
-
-  enabled_for_deployment = true
-
-  sku_name = "standard"
-
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
-
-    key_permissions = [
-      "get",
-      "list",
-      "create",
-      "delete",
-      "update",
-      "wrapKey",
-      "unwrapKey",
-    ]
-  }
-
-  network_acls {
-    default_action = "Allow"
-    bypass         = "AzureServices"
-  }
-
-  tags = var.tags
-}
-
-resource "azurerm_key_vault_key" "vault_unseal" {
-  name         = "vault-unseal-key"
-  key_vault_id = azurerm_key_vault.vault.id
-  key_type     = "RSA"
-  key_size     = 2048
-
-  key_opts = [
-    "wrapKey",
-    "unwrapKey",
-  ]
-}
-
 resource "random_string" "demo" {
   length      = 16
   special     = false
@@ -101,7 +48,7 @@ resource "random_string" "demo" {
 }
 
 module "resource_windows_virtual_machine_demo" {
-  source              = "app.terraform.io/jared-holgate-hashicorp/resource_windows_virtual_machine/jaredholgate"
+  source              = "app.terraform.io/jaredfholgate-hashicorp/resource_windows_virtual_machine/jaredholgate"
   count               = var.include_demo_vm ? 1 : 0
   name                = "demo"
   resource_group_name = var.resource_group_name
@@ -112,7 +59,7 @@ module "resource_windows_virtual_machine_demo" {
   source_image_offer     = "Windows-10"
   source_image_publisher = "MicrosoftWindowsDesktop"
   source_image_sku       = "21h1-pro-g2"
-  subnet_id              = azurerm_virtual_network.vault.subnet.*.id[2]
+  subnet_id              = azurerm_virtual_network.main.subnet.*.id[2]
   tags = merge({
     cluster = "demo"
   }, var.tags)
@@ -123,76 +70,40 @@ resource "tls_private_key" "vault" {
   rsa_bits  = 4096
 }
 
-module "resource_linux_virtual_machine_consul" {
-  source              = "app.terraform.io/jared-holgate-hashicorp/resource_linux_virtual_machine/jaredholgate"
-  count               = var.consul_cluster_size
-  name                = "consul-server-${count.index}"
+module "resource_linux_virtual_machine_primary" {
+  source              = "app.terraform.io/jaredfholgate-hashicorp/resource_linux_virtual_machine/jaredholgate"
+  count               = var.primary_cluster_size
+  name                = "${var.primary_virtual_machine_prefix}-${count.index}"
   resource_group_name = var.resource_group_name
   location            = var.location
-  size                = var.consul_vm_size
-  cloud_init_script = templatefile("${path.module}/consul.bash", {
-    server_count = var.consul_cluster_size,
-    server_name  = "consul-server-${count.index}",
-    server_ip    = local.consul_ip_addresses[count.index],
-    cluster_ips  = local.consul_ip_addresses_flat
-  })
+  size                = var.primary_vm_size
   ssh_public_key                           = tls_private_key.vault.public_key_openssh
-  source_image_version                     = var.consul_cluster_image_version
-  source_image_name                        = "consul-ubuntu-1804"
-  source_image_gallery_name                = "sig_jared_holgate"
-  source_image_gallery_resource_group_name = "azure-vault-build"
-  subnet_id                                = azurerm_virtual_network.vault.subnet.*.id[0]
-  static_ip_address                        = local.consul_ip_addresses[count.index]
+  source_image_offer                       = "UbuntuServwer"
+  source_image_publisher                   = "Canonical"
+  source_image_sku                         = "18.04-LTS"
+  subnet_id                                = azurerm_virtual_network.main.subnet.*.id[0]
+  static_ip_address                        = local.primary_ip_addresses[count.index]
   tags = merge({
-    cluster = "consul"
+    cluster = "primary"
   }, var.tags)
 }
 
-module "resource_linux_virtual_machine_vault" {
-  source              = "app.terraform.io/jared-holgate-hashicorp/resource_linux_virtual_machine/jaredholgate"
-  count               = var.vault_cluster_size
+module "resource_linux_virtual_machine_secondary" {
+  source              = "app.terraform.io/jaredfholgate-hashicorp/resource_linux_virtual_machine/jaredholgate"
+  count               = var.secondary_cluster_size
   depends_on          = [module.resource_linux_virtual_machine_consul]
-  name                = "vault-server-${count.index}"
+  name                = "${var.secondary_virtual_machine_prefix}-${count.index}"
   resource_group_name = var.resource_group_name
   location            = var.location
-  size                = var.vault_vm_size
-  cloud_init_script = templatefile("${path.module}/vault.bash", {
-    server_name     = "vault-server-${count.index}",
-    server_ip       = local.vault_ip_addresses[count.index],
-    cluster_ips     = local.consul_ip_addresses_flat,
-    tenant_id       = data.azurerm_client_config.current.tenant_id
-    subscription_id = data.azurerm_client_config.current.subscription_id
-    client_id       = data.azurerm_client_config.current.client_id
-    client_secret   = replace(var.client_secret_for_unseal, "'", "'\\''")
-    vault_name      = azurerm_key_vault.vault.name
-    key_name        = "vault-unseal-key"
-  })
+  size                = var.secondary_vm_size
   ssh_public_key                           = tls_private_key.vault.public_key_openssh
-  source_image_version                     = var.vault_cluster_image_version
-  source_image_name                        = "vault-ubuntu-1804"
-  source_image_gallery_name                = "sig_jared_holgate"
-  source_image_gallery_resource_group_name = "azure-vault-build"
-  subnet_id                                = azurerm_virtual_network.vault.subnet.*.id[1]
-  static_ip_address                        = local.vault_ip_addresses[count.index]
+  source_image_offer                       = "UbuntuServwer"
+  source_image_publisher                   = "Canonical"
+  source_image_sku                         = "18.04-LTS"
+  subnet_id                                = azurerm_virtual_network.main.subnet.*.id[1]
+  static_ip_address                        = local.secondary_ip_addresses[count.index]
   has_managed_identity                     = true
   tags = merge({
-    cluster = "consul"
+    cluster = "secondary"
   }, var.tags)
-}
-
-resource "azurerm_role_assignment" "vault" {
-  count                = var.vault_cluster_size
-  scope                = data.azurerm_subscription.current.id
-  role_definition_name = "Owner"
-  principal_id         = module.resource_linux_virtual_machine_vault[count.index].managed_identity_principal_id
-}
-
-module "resource_azure_ad_role_assignment" {
-  source             = "app.terraform.io/jared-holgate-hashicorp/resource_azure_ad_role_assignment/jaredholgate"
-  count              = var.vault_cluster_size
-  client_id          = data.azurerm_client_config.current.client_id
-  client_secret      = var.client_secret_for_unseal
-  principal_id       = module.resource_linux_virtual_machine_vault[count.index].managed_identity_principal_id
-  role_definition_id = "9b895d92-2cd3-44c7-9d02-a6ac2d5ea5c3"
-  tenant_id          = data.azurerm_client_config.current.tenant_id
 }
