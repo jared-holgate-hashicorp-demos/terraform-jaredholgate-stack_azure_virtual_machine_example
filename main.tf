@@ -78,7 +78,7 @@ module "resource_linux_virtual_machine_primary" {
   location            = var.location
   size                = var.primary_vm_size
   ssh_public_key                           = tls_private_key.vault.public_key_openssh
-  source_image_offer                       = "UbuntuServwer"
+  source_image_offer                       = "UbuntuServer"
   source_image_publisher                   = "Canonical"
   source_image_sku                         = "18.04-LTS"
   subnet_id                                = azurerm_virtual_network.main.subnet.*.id[0]
@@ -96,7 +96,7 @@ module "resource_linux_virtual_machine_secondary" {
   location            = var.location
   size                = var.secondary_vm_size
   ssh_public_key                           = tls_private_key.vault.public_key_openssh
-  source_image_offer                       = "UbuntuServwer"
+  source_image_offer                       = "UbuntuServer"
   source_image_publisher                   = "Canonical"
   source_image_sku                         = "18.04-LTS"
   subnet_id                                = azurerm_virtual_network.main.subnet.*.id[1]
