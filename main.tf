@@ -1,7 +1,7 @@
 locals {
   subnets                  = cidrsubnets(var.parent_ip_range, 8, 8, 8)
-  primary_ip_addresses      = [for index in range(10, var.consul_cluster_size + 10) : cidrhost(local.subnets[0], index)]
-  secondary_ip_addresses       = [for index in range(10, var.vault_cluster_size + 10) : cidrhost(local.subnets[1], index)]
+  primary_ip_addresses      = [for index in range(10, var.primary_cluster_size + 10) : cidrhost(local.subnets[0], index)]
+  secondary_ip_addresses       = [for index in range(10, var.secondary_cluster_size + 10) : cidrhost(local.subnets[1], index)]
 }
 
 resource "azurerm_virtual_network" "main" {
@@ -91,7 +91,6 @@ module "resource_linux_virtual_machine_primary" {
 module "resource_linux_virtual_machine_secondary" {
   source              = "app.terraform.io/jaredfholgate-hashicorp/resource_linux_virtual_machine/jaredholgate"
   count               = var.secondary_cluster_size
-  depends_on          = [module.resource_linux_virtual_machine_consul]
   name                = "${var.secondary_virtual_machine_prefix}-${count.index}"
   resource_group_name = var.resource_group_name
   location            = var.location
