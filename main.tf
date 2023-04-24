@@ -40,7 +40,7 @@ data "azurerm_subscription" "current" {
 resource "random_string" "demo" {
   length      = 16
   special     = false
-  number      = true
+  numeric      = true
   upper       = true
   min_lower   = 1
   min_numeric = 1
